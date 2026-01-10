@@ -49,6 +49,18 @@ void PinManager::Update(float dt, BowlingBall& ball)
             ResolvePinPin(m_pins[i], m_pins[j]);
         }
     }
+    // š €‚ñ‚¾ƒsƒ“‚ğíœ
+    m_pins.erase(
+        std::remove_if(
+            m_pins.begin(),
+            m_pins.end(),
+            [](const Pins& p)
+            {
+                return p.IsDead();
+            }
+        ),
+        m_pins.end()
+    );
 }
 
 void PinManager::AddPin(const XMFLOAT3& pos)

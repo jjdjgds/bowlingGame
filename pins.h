@@ -31,7 +31,7 @@ public:
 
     // 状態取得
     bool IsDown() const;
-
+    bool IsDead() const { return m_isDead; }
     // 位置取得
     const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
     const DirectX::XMFLOAT3& GetVelocity() const { return m_velocity; }
@@ -48,7 +48,14 @@ private:
     float m_mass;
     AABB m_Aabb;
     MODEL* m_model{ nullptr };
+    float m_aliveTime = 0.0f;
+    bool  m_isDead = false;
     DirectX::XMFLOAT3 m_baseHalf;   // ← モデル基準の当たり判定サイズ
+    bool m_isHit = false;   // ボール or 他ピンに当たった
+   // bool m_isDown = false; // 角度的に倒れている
+    //bool m_isDead = false; // 削除対象
+    float m_lifeTimer = 0.0f;
+
 public:
     
   

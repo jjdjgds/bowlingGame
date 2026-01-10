@@ -78,10 +78,24 @@ void Pins::Update(float deltaTime)
         m_baseHalf.z * m_scale.z
     };
 
-    // 倒れたら横に広げる
+    // ★ 吹き飛び判定
     if (m_isDown)
     {
-        half = { half.y, half.x, half.y };
+        m_aliveTime += deltaTime;
+
+        // 例：3秒後に消える
+        if (m_aliveTime > 3.0f)
+        {
+            m_isDead = true;
+        }
+    }
+    if (m_isHit)
+    {
+        m_lifeTimer += deltaTime;
+        if (m_lifeTimer > 3.0f)
+        {
+            m_isDead = true;
+        }
     }
 
     // ★ AABB中心を下にずらす
@@ -115,6 +129,12 @@ void Pins::Draw()
 
 void Pins::Hit(const XMFLOAT3& impulse, const XMFLOAT3& hitPoint)
 {
+    if (!m_isHit)
+    {
+        m_isHit = true;
+        m_lifeTimer = 0.0f;
+    }
+
     // 線形インパルス
     m_velocity.x += impulse.x / m_mass;
     m_velocity.y += impulse.y / m_mass;
