@@ -60,7 +60,7 @@ static int g_texid2 = -1;
 static AABB g_GoalAABB;
 static bool g_IsGoal = false;
 BowlingBall g_BowlingBall;
-Pins g_pins;
+Pins g_pins[3];
 void ResolveBallPinHit(BowlingBall& ball, Pins& pin);
 void Game_Initialize()
 {
@@ -86,7 +86,8 @@ void Game_Initialize()
 	g_texid = Texture_Load(L"rom\\runningman003.png");
 	g_pKirby = ModelLoad("rom\\Model\\kirby.fbx",0.1);
 	g_texid2 = Texture_Load(L"rom\\bomb3.png");
-	g_pins.Initialize({3,10,10});
+	g_pins[0].Initialize({3,10,10});
+	g_pins[1].Initialize({ 3,10,8 });
 
 
 	g_pTestAnim = new AnimPattern(g_texid, 10, 5, 0.1, { 0,0 }, { 140,200});
@@ -142,15 +143,19 @@ void Game_Update(double elapsed_time)
 	}
 
 	Score_Update();
-	g_pins.Update(elapsed_time);
-	if (!g_pins.IsDown())
+	for (auto& a : g_pins)
 	{
-		Hit hit = g_BowlingBall.GetAABB().IsHit(g_pins.GetAABB());
-		if (hit.IsHit())
+		a.Update(elapsed_time);
+		if (!a.IsDown())
 		{
-			ResolveBallPinHit(g_BowlingBall, g_pins);
+			Hit hit = g_BowlingBall.GetAABB().IsHit(a.GetAABB());
+			if (hit.IsHit())
+			{
+				ResolveBallPinHit(g_BowlingBall, a);
+			}
 		}
 	}
+	
 	Hit hit = g_GoalAABB.IsHit(Ball_GetAABB());
 	//ãŒü‚«–@ü‚ªTrue‚¾‚Á‚½‚ç‚Ì‚ğæ‚ê‚Î‚Ü‚Ÿ‚¢‚¢‚æ‚Ë
 	if (hit.IsHit()) {
@@ -194,7 +199,11 @@ void Game_Draw()
 	
 	g_pDebugCamera->SetMatrix();   // š‚±‚ê‚ªÅd—v
 	g_BowlingBall.Draw();
-	g_pins.Draw();
+	for (auto& a : g_pins)
+	{
+		a.Draw();
+	}
+
 
 	Gulid_Draw();
 	Light_SetAmnient({0.5f,0.5f,0.6f,1.0f});
