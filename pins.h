@@ -34,7 +34,7 @@ public:
 
     // ˆÊ’uæ“¾
     const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
-
+    const DirectX::XMFLOAT3& GetVelocity() const { return m_velocity; }
 
 private:
     // ˆÊ’uE‰ñ“]
