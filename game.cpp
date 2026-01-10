@@ -27,6 +27,7 @@
 #include "bowlingBall.h"
 #include "DebugDraw.h"
 #include "Mouselogger.h"
+#include "pins.h"
 using namespace DirectX;
 
 
@@ -59,6 +60,8 @@ static int g_texid2 = -1;
 static AABB g_GoalAABB;
 static bool g_IsGoal = false;
 BowlingBall g_BowlingBall;
+Pins g_pins;
+void ResolveBallPinHit(BowlingBall& ball, Pins& pin);
 void Game_Initialize()
 {
 	g_GoalAABB = AABB::Make({ float(1.0f), 0.9f, float(1.0f) }, { 1,1,1 });
@@ -83,7 +86,7 @@ void Game_Initialize()
 	g_texid = Texture_Load(L"rom\\runningman003.png");
 	g_pKirby = ModelLoad("rom\\Model\\kirby.fbx",0.1);
 	g_texid2 = Texture_Load(L"rom\\bomb3.png");
-
+	g_pins.Initialize({3,10,10});
 
 
 	g_pTestAnim = new AnimPattern(g_texid, 10, 5, 0.1, { 0,0 }, { 140,200});
@@ -139,7 +142,15 @@ void Game_Update(double elapsed_time)
 	}
 
 	Score_Update();
-	
+	g_pins.Update(elapsed_time);
+	if (!g_pins.IsDown())
+	{
+		Hit hit = g_BowlingBall.GetAABB().IsHit(g_pins.GetAABB());
+		if (hit.IsHit())
+		{
+			ResolveBallPinHit(g_BowlingBall, g_pins);
+		}
+	}
 	Hit hit = g_GoalAABB.IsHit(Ball_GetAABB());
 	//上向き法線がTrueだったらのを取ればまぁいいよね
 	if (hit.IsHit()) {
@@ -183,7 +194,7 @@ void Game_Draw()
 	
 	g_pDebugCamera->SetMatrix();   // ★これが最重要
 	g_BowlingBall.Draw();
-	
+	g_pins.Draw();
 
 	Gulid_Draw();
 	Light_SetAmnient({0.5f,0.5f,0.6f,1.0f});
@@ -203,7 +214,7 @@ void Game_Draw()
 
 	
 	Map_Draw();
-	
+	DebugDraw_Draw();
 	//2D描画はここに
 	Direct3D_SetDepthTest(false);
 	//Score_Draw();
@@ -239,6 +250,38 @@ void Game_Finalize()
 	Light_Finalize();
 	Shot_Finalize();
 	Trail_Finalize();
+}
+void ResolveBallPinHit(BowlingBall& ball, Pins& pin)
+{
+	// 球 → ピン方向
+	XMVECTOR dir =
+		XMLoadFloat3(&pin.GetPosition()) -
+		XMLoadFloat3(&ball.GetPosition());
+	dir = XMVector3Normalize(dir);
+
+	// ボール速度
+	XMFLOAT3 ballVel = ball.GetVelocity();
+	XMVECTOR v = XMLoadFloat3(&ballVel);
+
+	// 正面衝突成分のみ
+	float speed = XMVectorGetX(XMVector3Dot(v, dir));
+	if (speed <= 0.0f) return;
+
+	float impulsePower = speed * ball.GetMass() * 1.2f;
+	XMVECTOR impulse = dir * impulsePower;
+
+	// 少し上を叩く
+	XMFLOAT3 hitPoint = pin.GetPosition();
+	hitPoint.y += 1.0f;
+
+	pin.Hit(
+		{
+			XMVectorGetX(impulse),
+			XMVectorGetY(impulse),
+			XMVectorGetZ(impulse)
+		},
+		hitPoint
+	);
 }
 
 

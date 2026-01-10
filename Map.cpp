@@ -113,7 +113,7 @@ void Map_Draw()
     {
         block.Draw();
     }
-    DebugDraw_Draw();
+   // DebugDraw_Draw();
 }
 
 void Block::Draw() const

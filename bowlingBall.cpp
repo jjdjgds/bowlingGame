@@ -5,7 +5,6 @@
 #include "DebugDraw.h" // 追加
 #include "Map.h"
 using namespace DirectX;
-static AABB g_Aabb{};
 static MODEL* g_pBall{};
 
 
@@ -18,8 +17,8 @@ void BowlingBall::Init(const XMFLOAT3& pos)
     m_position = pos;
     m_velocity = { 0.0f, 0.0f ,0.0f};
     g_pBall = ModelLoad("rom\\Model\\ball.fbx", 0.1);
-    g_Aabb = g_pBall->Aabb;
-    g_Aabb = AABB::Make(m_position, { 0.3f,0.3f,0.3f });
+    m_Aabb = g_pBall->Aabb;
+    m_Aabb = AABB::Make(GetPosition(), {0.3f,0.3f,0.3f});
 }
 
 void BowlingBall::Update(float deltaTime)
@@ -32,7 +31,7 @@ void BowlingBall::Update(float deltaTime)
     m_position.y += m_velocity.y * deltaTime;
     m_position.z += m_velocity.z * deltaTime;
 
-    g_Aabb.Move(m_position);
+    m_Aabb.Move(m_position);
 
     m_onGround = false;
 
@@ -40,17 +39,17 @@ void BowlingBall::Update(float deltaTime)
     for (int i = 0; i < MapGetBlockCount(); ++i)
     {
         const AABB& block = GetCollision(i);
-        Hit hit = g_Aabb.IsHit(block);
+        Hit hit = m_Aabb.IsHit(block);
 
         if (!hit.IsHit()) continue;
 
         // 各軸の貫入深度を再計算（球側=AABB g_Aabb, ブロック=block）
         float depth_x =
-            std::min(g_Aabb.GetMax().x, block.GetMax().x) - std::max(g_Aabb.GetMin().x, block.GetMin().x);
+            std::min(m_Aabb.GetMax().x, block.GetMax().x) - std::max(m_Aabb.GetMin().x, block.GetMin().x);
         float depth_y =
-            std::min(g_Aabb.GetMax().y, block.GetMax().y) - std::max(g_Aabb.GetMin().y, block.GetMin().y);
+            std::min(m_Aabb.GetMax().y, block.GetMax().y) - std::max(m_Aabb.GetMin().y, block.GetMin().y);
         float depth_z =
-            std::min(g_Aabb.GetMax().z, block.GetMax().z) - std::max(g_Aabb.GetMin().z, block.GetMin().z);
+            std::min(m_Aabb.GetMax().z, block.GetMax().z) - std::max(m_Aabb.GetMin().z, block.GetMin().z);
 
         // 最も浅い軸を選ぶ
         int shallow_axis = 0; // 0:x, 1:y, 2:z
@@ -61,9 +60,9 @@ void BowlingBall::Update(float deltaTime)
             shallow_axis = (depth_y < depth_z) ? 1 : 2;
         }
 
-        const XMFLOAT3& ballCenter = g_Aabb.GetCenter();
+        const XMFLOAT3& ballCenter = m_Aabb.GetCenter();
         const XMFLOAT3& blockCenter = block.GetCenter();
-        const XMFLOAT3& ballHalf = g_Aabb.GetHalfSize();
+        const XMFLOAT3& ballHalf = m_Aabb.GetHalfSize();
 
         // 軸ごとに押し戻す（半幅を使う）
         if (shallow_axis == 1) // Y
@@ -108,14 +107,14 @@ void BowlingBall::Update(float deltaTime)
         }
 
         // 補正後に AABB を移動して次の判定に反映
-        g_Aabb.Move(m_position);
+        m_Aabb.Move(m_position);
     }
 
     // ===== 摩擦 =====
     if (m_onGround)
     {
-        m_velocity.x *= 0.98f;
-        m_velocity.z *= 0.98f;
+        //m_velocity.x *= 0.98f;
+        //m_velocity.z *= 0.98f;
     }
 }
 
@@ -139,6 +138,6 @@ void BowlingBall::Draw()
     ModelDraw(g_pBall, mtxWorld);
 
     // デバッグ描画：AABB を赤いラインで表示
-    DebugDraw_AddAABB(g_Aabb, {1.0f, 0.0f, 0.0f, 1.0f});
-    DebugDraw_Draw();
+    DebugDraw_AddAABB(m_Aabb, {1.0f, 0.0f, 0.0f, 1.0f});
+   // DebugDraw_Draw();
 }

@@ -13,7 +13,7 @@
 
 #pragma once
 #include <DirectXMath.h>
-
+#include "Collision.h"
 class BowlingBall
 {
 public:
@@ -32,16 +32,21 @@ public:
     void AddForce(const DirectX::XMFLOAT3& force);
 
     // 取得
-    const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
+  //  const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
     float GetRadius() const { return m_radius; }
-
+    const DirectX::XMFLOAT3& GetPosition() const { return m_position; }
+    const DirectX::XMFLOAT3& GetVelocity() const { return m_velocity; }
+    float GetMass() const { return m_mass; }
+    const AABB& GetAABB() { return m_Aabb; }
 private:
     DirectX::XMFLOAT3 m_position{};
     DirectX::XMFLOAT3 m_velocity{};
     float m_gravity = -9.8f;
     bool  m_onGround = false;
     float m_pawer = 50.0f;
-
+     AABB m_Aabb{};
     float m_radius = 0.3f;   // レーン基準の半径
     float m_mass = 6.8f;    // ボーリング球っぽい重さ(kg)
+   
+
 };
