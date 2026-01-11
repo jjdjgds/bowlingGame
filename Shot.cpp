@@ -33,6 +33,7 @@ static constexpr float MAX_POWER = 100.0f;
 static float g_ChargeRatio = 0.0f;   // 0～1
 static float g_ChargeDir = 1.0f;   // +1 or -1
 static constexpr float CHARGE_SPEED = 1.5f; // 往復スピード
+static float g_UIBlinkTime = 0.0f; // MAX時点滅用
 
 float Shot_GetPower()
 {
@@ -132,6 +133,7 @@ void Shot_Update(double et)
                 g_State = ShotState::Aim;
             }
         }
+
     }
 
 
@@ -153,7 +155,16 @@ void Shot_Update(double et)
         }
     }
 
+    bool isMax = (g_ChargeRatio >= 0.98f);
 
+    if (isMax)
+    {
+        g_UIBlinkTime += (float)et;
+    }
+    else
+    {
+        g_UIBlinkTime = 0.0f;
+    }
 
 }
 
@@ -208,9 +219,9 @@ void Shot_SetPosition(const XMFLOAT3& position)
 
 float Shot_GetChargeRatio()
 {
-    if (!g_IsCharging) return 0.0f;
     return Clamp(g_ChargeRatio, 0.0f, 1.0f);
 }
+
 
 
 bool Shot_IsCharging()
@@ -220,29 +231,49 @@ bool Shot_IsCharging()
 
 void Shot_DrawUI()
 {
-    if (!Shot_IsCharging())
+    if (g_State != ShotState::Charge &&
+        g_State != ShotState::Aim)
         return;
 
     float ratio = Shot_GetChargeRatio();
 
-    const float cx = 150.0f;
+    const float cx = 300.0f;
     const float cy = 600.0f;
-    const float radius = 60.0f;
+    const float radius = 200.0f;
     const float thickness = 14.0f;
-    const int   SEGMENTS = 36;
+    const int   SEGMENTS = 72;
 
     int drawCount = (int)(SEGMENTS * ratio);
     if (drawCount < 1 && ratio > 0.0f)
         drawCount = 1;
 
-    // 前景
-    for (int i = 0; i < drawCount; ++i)
+    // ===== 色計算 =====
+    bool isMax = (ratio >= 0.98f);
+
+    float blink = isMax
+        ? (sinf(g_UIBlinkTime * 8.0f) * 0.5f + 0.5f)
+        : 1.0f;
+
+    XMFLOAT4 activeColor =
+        isMax
+        ? XMFLOAT4(1.0f, blink * 0.2f, blink * 0.2f, 1.0f) // 赤点滅
+        : XMFLOAT4(
+            1.0f,
+            0.3f + 0.7f * ratio, // 黄寄り
+            0.1f,
+            1.0f
+        );
+
+    // ===== 円ゲージ =====
+    for (int i = 0; i < SEGMENTS; ++i)
     {
         float t = (float)i / (float)SEGMENTS;
         float angle = t * XM_2PI - XM_PIDIV2;
 
         float x = cx + cosf(angle) * radius;
         float y = cy + sinf(angle) * radius;
+
+        bool filled = (i < drawCount);
 
         Sprite_Draw(
             g_PowerBarTex,
@@ -251,28 +282,25 @@ void Shot_DrawUI()
             thickness,
             thickness * 2.5f,
             0, 0, 8, 8,
-            { 1.0f, 0.6f, 0.1f, 1.0f }
+            filled
+            ? activeColor
+            : XMFLOAT4(0.2f, 0.2f, 0.2f, 0.4f)
         );
     }
 
-    // 背景
-    for (int i = drawCount; i < SEGMENTS; ++i)
-    {
-        float t = (float)i / (float)SEGMENTS;
-        float angle = t * XM_2PI - XM_PIDIV2;
+    // ===== 中央数値表示 =====
+    int powerValue = (int)(ratio * MAX_POWER + 0.5f);
 
-        float x = cx + cosf(angle) * radius;
-        float y = cy + sinf(angle) * radius;
+    // ※ 文字描画関数は環境依存
+    // 例：Font_DrawText(x, y, size, color, "text");
+    char buf[16];
+    sprintf_s(buf, "%d", powerValue);
 
-        Sprite_Draw(
-            g_PowerBarTex,
-            angle,
-            x, y,
-            thickness,
-            thickness * 2.5f,
-            0, 0, 8, 8,
-            { 0.2f, 0.2f, 0.2f, 0.4f }
-        );
-    }
+    //Font_DrawText(
+    //    cx - 18.0f,     // 中央寄せ調整
+    //    cy - 12.0f,
+    //    24.0f,
+    //    isMax ? XMFLOAT4(1, 0.3f, 0.3f, 1) : XMFLOAT4(1, 1, 1, 1),
+    //    buf
+    //);
 }
-

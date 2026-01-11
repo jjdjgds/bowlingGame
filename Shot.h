@@ -41,3 +41,4 @@ float Clamp(float v, float minV, float maxV);
 float Shot_GetChargeRatio();
 bool  Shot_IsCharging();
 void Shot_DrawUI();
+
