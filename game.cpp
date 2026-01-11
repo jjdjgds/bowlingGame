@@ -58,6 +58,10 @@ static ShotCamera* g_pShotCamera{ nullptr };
 
 static int g_texid = -1;
 static int g_texid2 = -1;
+static int g_ShotCount = 0;
+static constexpr int MAX_SHOT = 2;
+static const XMFLOAT3 BALL_START_POS = { 3,5,2 };
+static bool g_BallInPlay = false;
 
 static AABB g_GoalAABB;
 static bool g_IsGoal = false;
@@ -126,24 +130,7 @@ void Game_Update(double elapsed_time)
 	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
 
 	//Trail_SetCameraPosition(g_FixedCameras[g_FixedCameraIndex]->GetPosition());
-	//if (Ball_IsStationary())
-	//{
-	//	Shot_SetPosition(Ball_GetPosition());
 
-	//	if (/*!MouseLogger_IsPressed(MouseKey::Left) &&*/ Shot_GetPower() > 0.0f)
-	//	{
-	//		XMFLOAT3 dir = Shot_GetVelocity();
-	//		float power = Shot_GetPower();
-
-	//		g_BowlingBall.AddForce({
-	//			dir.x * power,
-	//			0.0f,
-	//			dir.z * power
-	//			});
-
-	//		Shot_ResetPower();
-	//	}
-	//}
 
 	Score_Update();
 	if (KeyLogger_IsPressed(KK_R))
@@ -164,11 +151,31 @@ void Game_Update(double elapsed_time)
 		}
 	}*/
 
-	if (Shot_IsFired())
+	
+	bool fired = Shot_ConsumeFire();
+
+	if (!g_BallInPlay && fired)
 	{
 		g_BowlingBall.AddForce(Shot_GetShotVelocity());
-		Shot_ResetPower();   // ó‘Ô‰Šú‰»
+		Shot_ResetPower();
+		g_BallInPlay = true;
 	}
+
+	if (g_BallInPlay && g_BowlingBall.IsStopped())
+	{
+		g_BowlingBall.Reset(BALL_START_POS);
+		g_BallInPlay = false;
+
+		g_ShotCount++;
+		if (g_ShotCount >= MAX_SHOT)
+		{
+			g_Pinmanager.ResetPins();
+			g_ShotCount = 0;
+		}
+	}
+
+
+
 
 	g_Pinmanager.Update(elapsed_time, g_BowlingBall);
 
@@ -197,7 +204,7 @@ void Game_Update(double elapsed_time)
 
 	AuraEffect_Update(elapsed_time);
 	ParticleEffect_Update(elapsed_time);
-	//AuraEffect_Update(deltaTime)
+	
 	
 }
 

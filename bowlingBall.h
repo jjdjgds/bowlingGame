@@ -32,6 +32,8 @@ public:
     void AddForce(const DirectX::XMFLOAT3& force);
 
 	DirectX::XMMATRIX GetWorldMatrix() const { return m_mtxWorld; }
+    void Reset(const DirectX::XMFLOAT3& pos);
+    bool IsStopped() const;
 
     // Žæ“¾
   //  const DirectX::XMFLOAT3& GetPosition() const { return m_position; }

@@ -151,6 +151,25 @@ void BowlingBall::AddForce(const XMFLOAT3& force)
 
 }
 
+void BowlingBall::Reset(const XMFLOAT3& pos)
+{
+    m_position = pos;
+    m_velocity = { 0,0,0 };
+   
+}
+
+bool BowlingBall::IsStopped() const
+{
+    const float STOP_EPS = 0.05f;
+    return
+        fabs(m_velocity.x) < STOP_EPS &&
+        fabs(m_velocity.y) < STOP_EPS &&
+        fabs(m_velocity.z) < STOP_EPS &&
+        m_onGround;
+}
+
+
+
 void BowlingBall::Draw()
 {
     Shader3d_Begin();

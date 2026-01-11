@@ -56,16 +56,16 @@ XMFLOAT3 Shot_GetShotVelocity()
 void Shot_ResetPower()
 {
     g_Power = 0.0f;
-    //g_ChargeTimer = 0.0f;
     g_AimTime = 0.0f;
     g_Front = { 0,0,1 };
 
     g_ChargeRatio = 0.0f;
     g_ChargeDir = 1.0f;
-    g_IsCharging = false;
 
+    g_IsCharging = true;   // ★ ここが重要
     g_State = ShotState::Charge;
 }
+
 
 
 
@@ -304,3 +304,15 @@ void Shot_DrawUI()
     //    buf
     //);
 }
+
+bool Shot_ConsumeFire()
+{
+    if (g_State == ShotState::Fired)
+    {
+        g_State = ShotState::Charge;
+        g_IsCharging = true;
+        return true;
+    }
+    return false;
+}
+
