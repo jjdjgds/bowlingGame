@@ -25,12 +25,13 @@ static float g_ChargeTimer = 0.0f;
 static int   g_HitCount = 0;
 
 static constexpr float CHARGE_LIMIT = 3.0f; // 2秒
-static constexpr float POWER_PER_HIT = 5.0f;
+static constexpr float POWER_PER_HIT = 15.0f;
 static float g_AimTime = 0.0f;
 static constexpr float SWING_SPEED = 3.0f;   // 揺れ速度
 static constexpr float MAX_ANGLE = XM_PIDIV4; // ±45°
 static float g_AimAngle = 0.0f;
-static constexpr float BALL_RADIUS = -0.5f;
+static constexpr float BALL_RADIUS = -0.2f;
+static bool g_IsCharging = false;
 
 
 float Shot_GetPower()
@@ -58,8 +59,10 @@ void Shot_ResetPower()
     g_ChargeTimer = 0.0f;
     g_AimTime = 0.0f;
     g_Front = { 0,0,1 };
+    g_IsCharging = false;   // ★追加
     g_State = ShotState::Charge;
 }
+
 
 
 void Shot_Initialize(const XMFLOAT3& position, const XMFLOAT3& front)
@@ -87,30 +90,33 @@ void Shot_Update(double et)
 
     if (g_State == ShotState::Charge)
     {
-        hal::dout << "Charge\n";
-        g_ChargeTimer += (float)et;
-
-        if (KeyLogger_IsTrigger(KK_P)) // 連打キー
+        // 最初のPキーでチャージ開始
+        if (KeyLogger_IsTrigger(KK_P))
         {
+            if (!g_IsCharging)
+            {
+                g_IsCharging = true;
+                g_ChargeTimer = 0.0f;   // 念のため
+                g_HitCount = 0;
+            }
+
             g_HitCount++;
         }
 
-        if (g_ChargeTimer >= CHARGE_LIMIT)
+        // チャージ中だけ時間を進める
+        if (g_IsCharging)
         {
-            if (g_HitCount > 0)
+            g_ChargeTimer += (float)et;
+
+            if (g_ChargeTimer >= CHARGE_LIMIT)
             {
                 g_Power = Clamp(g_HitCount * POWER_PER_HIT, 5.0f, 50.0f);
+                g_IsCharging = false;
                 g_State = ShotState::Aim;
             }
-            else
-            {
-                // 押してない → 何も起きない（リセット or 継続）
-                g_ChargeTimer = 0.0f;
-                g_HitCount = 0;
-            }
         }
-
     }
+
     if (g_State == ShotState::Aim)
     {
         g_AimTime += (float)et;
