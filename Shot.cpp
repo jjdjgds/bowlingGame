@@ -17,16 +17,10 @@ static MODEL* g_Model{};
 
 static float g_Power = 0.0f;
 
-// ===== マウススイング用 =====
-static POINT g_PrevMousePos{};
-static bool  g_IsSwinging = false;
-static float g_SwingAccum = 0.0f;
-// 定数
-static constexpr float DIR_SMOOTH = 0.15f;
-static float g_ChargeTimer = 0.0f;
-static int   g_HitCount = 0;
 
-static constexpr float CHARGE_LIMIT = 3.0f; // 2秒
+
+
+
 
 static float g_AimTime = 0.0f;
 static constexpr float SWING_SPEED = 3.0f;   // 揺れ速度
@@ -35,9 +29,10 @@ static float g_AimAngle = 0.0f;
 static constexpr float BALL_RADIUS = -0.2f;
 static bool g_IsCharging = false;
 static int g_PowerBarTex = -1; // 白1pxテクスチャなど
-static constexpr int   MAX_HIT_COUNT = 10;   // ★ 旧: 実質3～4 → 明示的に増やす
 static constexpr float MAX_POWER = 100.0f;
-static constexpr float POWER_PER_HIT = MAX_POWER / MAX_HIT_COUNT;
+static float g_ChargeRatio = 0.0f;   // 0～1
+static float g_ChargeDir = 1.0f;   // +1 or -1
+static constexpr float CHARGE_SPEED = 1.5f; // 往復スピード
 
 float Shot_GetPower()
 {
@@ -60,13 +55,17 @@ XMFLOAT3 Shot_GetShotVelocity()
 void Shot_ResetPower()
 {
     g_Power = 0.0f;
-    g_HitCount = 0;
-    g_ChargeTimer = 0.0f;
+    //g_ChargeTimer = 0.0f;
     g_AimTime = 0.0f;
     g_Front = { 0,0,1 };
-    g_IsCharging = false;   // ★追加
+
+    g_ChargeRatio = 0.0f;
+    g_ChargeDir = 1.0f;
+    g_IsCharging = false;
+
     g_State = ShotState::Charge;
 }
+
 
 
 
@@ -76,8 +75,8 @@ void Shot_Initialize(const XMFLOAT3& position, const XMFLOAT3& front)
     XMStoreFloat3(&g_Front, XMVector3Normalize(XMLoadFloat3(&front)));
     g_Model = ModelLoad("rom\\Model\\yajirushi.fbx", 0.1f);
     g_PowerBarTex = Texture_Load(L"rom/white_8x8.png");
-
-    GetCursorPos(&g_PrevMousePos);
+    g_IsCharging = true;
+    //GetCursorPos(&g_PrevMousePos);
 }
 
 void Shot_Finalize()
@@ -90,34 +89,41 @@ void Shot_Update(double et)
     POINT cur;
     GetCursorPos(&cur);
 
-    float dx = float(cur.x - g_PrevMousePos.x);
-    float dy = float(cur.y - g_PrevMousePos.y);
-    g_PrevMousePos = cur;
+   // float dx = float(cur.x - g_PrevMousePos.x);
+    //float dy = float(cur.y - g_PrevMousePos.y);
+    //g_PrevMousePos = cur;
 
     if (g_State == ShotState::Charge)
     {
-        // 最初のPキーでチャージ開始
-        if (KeyLogger_IsTrigger(KK_P))
+        // Pキーでチャージ開始
+        if (KeyLogger_IsTrigger(KK_P) && !g_IsCharging)
         {
-            if (!g_IsCharging)
-            {
-                g_IsCharging = true;
-                g_ChargeTimer = 0.0f;   // 念のため
-                g_HitCount = 0;
-            }
-
-            g_HitCount++;
+            
+            g_ChargeRatio = 0.0f;
+            g_ChargeDir = 1.0f;
         }
 
-        // チャージ中だけ時間を進める
         if (g_IsCharging)
         {
-            g_ChargeTimer += (float)et;
+            // 往復更新
+            g_ChargeRatio += g_ChargeDir * CHARGE_SPEED * (float)et;
 
-            if (g_ChargeTimer >= CHARGE_LIMIT)
+            if (g_ChargeRatio >= 1.0f)
+            {
+                g_ChargeRatio = 1.0f;
+                g_ChargeDir = -1.0f;
+            }
+            else if (g_ChargeRatio <= 0.0f)
+            {
+                g_ChargeRatio = 0.0f;
+                g_ChargeDir = 1.0f;
+            }
+
+            // ★ ここで確定
+            if (KeyLogger_IsTrigger(KK_P))
             {
                 g_Power = Clamp(
-                    g_HitCount * POWER_PER_HIT,
+                    g_ChargeRatio * MAX_POWER,
                     5.0f,
                     MAX_POWER
                 );
@@ -125,9 +131,9 @@ void Shot_Update(double et)
                 g_IsCharging = false;
                 g_State = ShotState::Aim;
             }
-
         }
     }
+
 
     if (g_State == ShotState::Aim)
     {
@@ -203,12 +209,9 @@ void Shot_SetPosition(const XMFLOAT3& position)
 float Shot_GetChargeRatio()
 {
     if (!g_IsCharging) return 0.0f;
-
-    return Clamp(
-        (float)g_HitCount / (float)MAX_HIT_COUNT,
-        0.0f, 1.0f
-    );
+    return Clamp(g_ChargeRatio, 0.0f, 1.0f);
 }
+
 
 bool Shot_IsCharging()
 {
@@ -222,19 +225,21 @@ void Shot_DrawUI()
 
     float ratio = Shot_GetChargeRatio();
 
-    // ===== 円形ゲージ設定 =====
     const float cx = 150.0f;
     const float cy = 600.0f;
     const float radius = 60.0f;
-    const float thickness = 14.0f;   // ★ 太さ
-    const int   SEGMENTS = 36;        // 円の分割数
+    const float thickness = 14.0f;
+    const int   SEGMENTS = 36;
 
     int drawCount = (int)(SEGMENTS * ratio);
+    if (drawCount < 1 && ratio > 0.0f)
+        drawCount = 1;
 
+    // 前景
     for (int i = 0; i < drawCount; ++i)
     {
         float t = (float)i / (float)SEGMENTS;
-        float angle = t * XM_2PI - XM_PIDIV2; // 上から開始
+        float angle = t * XM_2PI - XM_PIDIV2;
 
         float x = cx + cosf(angle) * radius;
         float y = cy + sinf(angle) * radius;
@@ -243,19 +248,14 @@ void Shot_DrawUI()
             g_PowerBarTex,
             angle,
             x, y,
-            thickness,  // 幅
-            thickness * 2.5f, // ★ 高さ（＝太さ感）
+            thickness,
+            thickness * 2.5f,
             0, 0, 8, 8,
-            {
-                1.0f,
-                0.3f + 0.7f * ratio, // チャージで色変化
-                0.1f,
-                1.0f
-            }
+            { 1.0f, 0.6f, 0.1f, 1.0f }
         );
     }
 
-    // ---- 背景円（薄く） ----
+    // 背景
     for (int i = drawCount; i < SEGMENTS; ++i)
     {
         float t = (float)i / (float)SEGMENTS;
@@ -275,3 +275,4 @@ void Shot_DrawUI()
         );
     }
 }
+
