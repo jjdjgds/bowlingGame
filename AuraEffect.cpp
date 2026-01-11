@@ -10,24 +10,21 @@
 
 #include "AuraEffect.h"
 #include "BillBord.h"
-#include "ShaderBillBoard.h"
 #include "texture.h"
-#include "direct3d.h"
 #include <cmath>
+
+using namespace DirectX;
 
 static double g_totalTime = 0.0;
 
-// ブレンドステート
-static ID3D11BlendState* g_pBlendAdd = nullptr;
-static ID3D11BlendState* g_pBlendAlpha = nullptr;
-
+// デフォルトパラメータ
 AuraEffectParams AuraEffect_GetDefaultParams()
 {
     AuraEffectParams params{};
     params.textureId = Texture_Load(L"rom\\Texture\\gra_effect_lightA.png");
     params.innerColor = { 1.0f, 1.0f, 1.0f, 0.8f };
     params.outerColor = { 0.5f, 0.5f, 1.0f, 0.3f };
-    params.baseScale = 1.0f;
+    params.baseScale = 5.f;
     params.pulseSpeed = 2.0f;
     params.pulseAmount = 0.2f;
     params.rotationSpeed = 0.5f;
@@ -35,49 +32,28 @@ AuraEffectParams AuraEffect_GetDefaultParams()
     params.layerScaleOffset = 0.3f;
     params.layerAlphaFalloff = 0.5f;
     params.useAdditiveBlending = true;
+
+    // パーティクルモードのデフォルト
+    params.useParticleMode = false;
+    params.particleCount = 20;
+    params.particleRadius = 1.0f;
+    params.particleSpeed = 1.0f;
+    params.particleScale = 0.5f;
+    params.particleRandomness = 0.3f;
+    params.particleVerticalSpeed = 1.0f;
+    params.particleVerticalRange = 2.0f;
+    params.particleRotationSpeed = 2.0f;
+
     return params;
 }
 
 void AuraEffect_Initialize()
 {
     g_totalTime = 0.0;
-
-    ID3D11Device* dev = Direct3D_GetDevice();
-    if (!dev) return;
-
-    // 加算ブレンド
-    D3D11_BLEND_DESC descAdd = {};
-    descAdd.AlphaToCoverageEnable = FALSE;
-    descAdd.IndependentBlendEnable = FALSE;
-    descAdd.RenderTarget[0].BlendEnable = TRUE;
-    descAdd.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-    descAdd.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-    descAdd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    descAdd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    descAdd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-    descAdd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    descAdd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-    dev->CreateBlendState(&descAdd, &g_pBlendAdd);
-
-    // ストレートアルファブレンド
-    D3D11_BLEND_DESC descAlpha = {};
-    descAlpha.AlphaToCoverageEnable = FALSE;
-    descAlpha.IndependentBlendEnable = FALSE;
-    descAlpha.RenderTarget[0].BlendEnable = TRUE;
-    descAlpha.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    descAlpha.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    descAlpha.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    descAlpha.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    descAlpha.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-    descAlpha.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    descAlpha.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-    dev->CreateBlendState(&descAlpha, &g_pBlendAlpha);
 }
 
 void AuraEffect_Finalize()
 {
-    if (g_pBlendAdd) { g_pBlendAdd->Release(); g_pBlendAdd = nullptr; }
-    if (g_pBlendAlpha) { g_pBlendAlpha->Release(); g_pBlendAlpha = nullptr; }
 }
 
 void AuraEffect_Update(double elapsedTime)
@@ -91,24 +67,7 @@ void AuraEffect_Draw(
 {
     using namespace DirectX;
 
-    ID3D11DeviceContext* ctx = Direct3D_GetContext();
-    if (!ctx) return;
-
-    // 元のブレンドステート保存
-    ID3D11BlendState* prevBlend = nullptr;
-    FLOAT prevFactor[4] = { 0,0,0,0 };
-    UINT prevMask = 0xffffffff;
-    ctx->OMGetBlendState(&prevBlend, prevFactor, &prevMask);
-
-    // 適切なブレンドを設定
-    if (params.useAdditiveBlending && g_pBlendAdd) {
-        FLOAT bf[4] = { 1,1,1,1 };
-        ctx->OMSetBlendState(g_pBlendAdd, bf, 0xffffffff);
-    }
-    else if (g_pBlendAlpha) {
-        FLOAT bf[4] = { 1,1,1,1 };
-        ctx->OMSetBlendState(g_pBlendAlpha, bf, 0xffffffff);
-    }
+    // NOTE: Billboard_SetViewMatrix()は呼び出し側で事前に設定しておく必要があります
 
     // 複数レイヤーの描画
     for (int i = 0; i < params.layerCount; ++i)
@@ -116,7 +75,7 @@ void AuraEffect_Draw(
         float layerProgress = static_cast<float>(i) / static_cast<float>(params.layerCount);
 
         // 脈動アニメーション
-        float pulsePhase = static_cast<float>(g_totalTime * params.pulseSpeed + i * 0.5f);
+        float pulsePhase = static_cast<float>(g_totalTime * params.pulseSpeed + i * 0.5);
         float pulse = 1.0f + std::sinf(pulsePhase) * params.pulseAmount;
 
         // 回転アニメーション
@@ -137,7 +96,8 @@ void AuraEffect_Draw(
         XMMATRIX mtxRotation = XMMatrixRotationZ(rotation);
         XMMATRIX mtxWorldWithRotation = mtxRotation * mtxWorld;
 
-        // ビルボード描画（UV全体、ピボット中心）
+        // テクスチャ全体を使用するため、オフセット(0,0)とサイズ(テクスチャ全体)を指定
+        // ピボットは中央(0,0)で回転
         Billboard_Draw(
             params.textureId,
             mtxWorldWithRotation,
@@ -146,15 +106,10 @@ void AuraEffect_Draw(
                 static_cast<float>(Texture_GetHeight(params.textureId))), // UV size
             XMFLOAT2(scale, scale),          // scale
             layerColor,                      // color
-            XMFLOAT2(0.0f, 0.0f)             // pivot
+            XMFLOAT2(0.0f, 0.0f)            // pivot
         );
     }
-
-    // 元のブレンドステートに戻す
-    ctx->OMSetBlendState(prevBlend, prevFactor, prevMask);
-    if (prevBlend) prevBlend->Release();
 }
-
 
 // プリセット: 炎のオーラ
 AuraEffectParams AuraEffect_PresetFire()
@@ -238,5 +193,88 @@ AuraEffectParams AuraEffect_PresetDark()
     params.layerScaleOffset = 0.35f;
     params.layerAlphaFalloff = 0.55f;
     params.useAdditiveBlending = false;
+    return params;
+}
+
+// ========== パーティクルモードプリセット ==========
+
+// 炎の粒子群
+AuraEffectParams AuraEffect_PresetFireParticles()
+{
+    AuraEffectParams params = AuraEffect_GetDefaultParams();
+    params.innerColor = { 1.0f, 0.9f, 0.3f, 1.0f };
+    params.outerColor = { 1.0f, 0.2f, 0.0f, 0.3f };
+    params.useAdditiveBlending = true;
+
+    // パーティクルモード設定
+    params.useParticleMode = true;
+    params.particleCount = 40;
+    params.particleRadius = 1.5f;
+    params.particleSpeed = 2.0f;
+    params.particleScale = 0.4f;
+    params.particleRandomness = 0.5f;
+    params.pulseSpeed = 4.0f;
+    params.pulseAmount = 0.3f;
+
+    return params;
+}
+
+// 星空エフェクト
+AuraEffectParams AuraEffect_PresetStarfield()
+{
+    AuraEffectParams params = AuraEffect_GetDefaultParams();
+    params.innerColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+    params.outerColor = { 0.7f, 0.8f, 1.0f, 0.5f };
+    params.useAdditiveBlending = true;
+
+    params.useParticleMode = true;
+    params.particleCount = 30;
+    params.particleRadius = 2.0f;
+    params.particleSpeed = 0.3f;
+    params.particleScale = 0.2f;
+    params.particleRandomness = 0.8f;
+    params.pulseSpeed = 3.0f;
+    params.pulseAmount = 0.5f;
+
+    return params;
+}
+
+// エネルギー球体
+AuraEffectParams AuraEffect_PresetEnergyOrb()
+{
+    AuraEffectParams params = AuraEffect_GetDefaultParams();
+    params.innerColor = { 0.3f, 0.8f, 1.0f, 0.9f };
+    params.outerColor = { 0.1f, 0.3f, 1.0f, 0.4f };
+    params.useAdditiveBlending = true;
+
+    params.useParticleMode = true;
+    params.particleCount = 50;
+    params.particleRadius = 1.2f;
+    params.particleSpeed = 1.5f;
+    params.particleScale = 0.3f;
+    params.particleRandomness = 0.2f;
+    params.pulseSpeed = 2.0f;
+    params.pulseAmount = 0.2f;
+
+    return params;
+}
+
+// 魔法陣風
+AuraEffectParams AuraEffect_PresetMagicCircle()
+{
+    AuraEffectParams params = AuraEffect_GetDefaultParams();
+    params.innerColor = { 0.8f, 0.2f, 1.0f, 1.0f };
+    params.outerColor = { 0.4f, 0.1f, 0.8f, 0.3f };
+    params.useAdditiveBlending = true;
+
+    params.useParticleMode = true;
+    params.particleCount = 60;
+    params.particleRadius = 2.5f;
+    params.particleSpeed = 0.8f;
+    params.particleScale = 0.25f;
+    params.particleRandomness = 0.1f;  // 整列させる
+    params.pulseSpeed = 1.5f;
+    params.pulseAmount = 0.15f;
+
     return params;
 }

@@ -187,6 +187,8 @@ void Shader3d_Finalize()
 {
 	SAFE_RELEASE(g_pSamplerState);
 	SAFE_RELEASE(g_pPSConstantBuffer);
+	SAFE_RELEASE(g_pPSConstantBuffer1);
+	SAFE_RELEASE(g_pPSConstantBuffer2);
 	SAFE_RELEASE(g_pPixelShader);
 	SAFE_RELEASE(g_pVSConstantBuffer0);
 
@@ -228,6 +230,9 @@ void Shader3d_Begin()
 
 	// 定数バッファを描画パイプラインに設定
 	g_pContext->VSSetConstantBuffers(0, 1, &g_pVSConstantBuffer0);
+	// 重要：ピクセルシェーダー b0 を確実にバインド（アンビエント）
+	g_pContext->PSSetConstantBuffers(0, 1, &g_pPSConstantBuffer);
+	// ピクセルシェーダー b1（ディフューズ）と b2（マテリアル）をバインド
 	g_pContext->PSSetConstantBuffers(1, 1, &g_pPSConstantBuffer1);
 
 	g_pContext->PSSetConstantBuffers(2, 1, &g_pPSConstantBuffer2);
@@ -247,4 +252,14 @@ void Shader3d_SetMaterialDiffuse(const DirectX::XMFLOAT4& Color)
 
 
 
+}
+
+// 追加：ディフューズ光（色 + ワールド方向）をピクセルシェーダ用定数バッファ(b1)へ書き込む
+void Shader3d_SetLightDiffuse(const DirectX::XMFLOAT4& diffuseColor, const DirectX::XMFLOAT4& worldDirection)
+{
+	PS_CB1 cb{};
+	cb.diffuse_color = diffuseColor;
+	cb.diffuse_world_vector = worldDirection;
+	// g_pPSConstantBuffer1 は b1 に割り当て済み
+	g_pContext->UpdateSubresource(g_pPSConstantBuffer1, 0, nullptr, &cb, 0, 0);
 }

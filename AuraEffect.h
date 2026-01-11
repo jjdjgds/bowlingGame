@@ -31,6 +31,17 @@ struct AuraEffectParams
     float layerScaleOffset;             // レイヤー間のスケール差
     float layerAlphaFalloff;            // レイヤー間の透明度減衰
     bool useAdditiveBlending;           // 加算合成を使用するか
+
+    // パーティクルモード用パラメータ
+    bool useParticleMode;               // パーティクルモードを使用するか
+    int particleCount;                  // パーティクル数 (1~100)
+    float particleRadius;               // パーティクルの配置半径
+    float particleSpeed;                // パーティクルの周回速度
+    float particleScale;                // 各パーティクルのスケール
+    float particleRandomness;           // ランダム性 (0.0~1.0)
+    float particleVerticalSpeed;        // 上下移動速度
+    float particleVerticalRange;        // 上下移動範囲
+    float particleRotationSpeed;        // パーティクル個別の回転速度
 };
 
 // デフォルト設定を返す
@@ -55,3 +66,9 @@ AuraEffectParams AuraEffect_PresetIce();       // 氷のオーラ
 AuraEffectParams AuraEffect_PresetElectric();  // 電気のオーラ
 AuraEffectParams AuraEffect_PresetHoly();      // 神聖なオーラ
 AuraEffectParams AuraEffect_PresetDark();      // 暗黒のオーラ
+
+// パーティクルモードプリセット
+AuraEffectParams AuraEffect_PresetFireParticles();     // 炎の粒子群
+AuraEffectParams AuraEffect_PresetStarfield();         // 星空エフェクト
+AuraEffectParams AuraEffect_PresetEnergyOrb();         // エネルギー球体
+AuraEffectParams AuraEffect_PresetMagicCircle();       // 魔法陣風

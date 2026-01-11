@@ -169,6 +169,7 @@
     <ClCompile Include="model.cpp" />
     <ClCompile Include="mouse.cpp" />
     <ClCompile Include="Mouselogger.cpp" />
+    <ClCompile Include="ParticleEffect.cpp" />
     <ClCompile Include="PinManager.cpp" />
     <ClCompile Include="pins.cpp" />
     <ClCompile Include="player.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="mouse.h" />
     <ClInclude Include="Mouselogger.h" />
+    <ClInclude Include="ParticleEffect.h" />
     <ClInclude Include="PinManager.h" />
     <ClInclude Include="pins.h" />
     <ClInclude Include="player.h" />

@@ -47,6 +47,6 @@ enum AlphaBlendMode
 void Direct3D_SetAlphaBlend(AlphaBlendMode blend);
 void Direct3D_SetDepthTest(bool bEnable);
 void Direct3D_SetDepthWriteDisable();
-
+void Direct3D_SetDepthWriteEnable();
 //void SetViewPort(int n);
 #endif // !DIRECT3D_H

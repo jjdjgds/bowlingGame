@@ -29,6 +29,7 @@
 #include "Mouselogger.h"
 #include "PinManager.h"
 #include "AuraEffect.h"
+#include "ParticleEffect.h"
 using namespace DirectX;
 
 
@@ -145,6 +146,11 @@ void Game_Update(double elapsed_time)
 	//}
 
 	Score_Update();
+	if (KeyLogger_IsPressed(KK_R))
+	{
+		g_Pinmanager.ResetPins();
+	}
+
 	/*for (auto& a : g_pins)
 	{
 		a.Update(elapsed_time);
@@ -190,7 +196,8 @@ void Game_Update(double elapsed_time)
 	}
 
 	AuraEffect_Update(elapsed_time);
-	
+	ParticleEffect_Update(elapsed_time);
+	//AuraEffect_Update(deltaTime)
 	
 }
 
@@ -208,7 +215,7 @@ void Game_Draw()
 		//XMMATRIX mtx = XMMatrixScaling(100.0f, 3000.0f, 10000.0f) * XMMatrixTranslation(4.5f, 0.5f, 4.5f);
 		//Cube_Draw(mtx,0);
 	
-
+	
 	g_BowlingBall.Draw();
 	g_Pinmanager.Draw();
 
@@ -227,7 +234,7 @@ void Game_Draw()
 	//ModelDraw(g_pPenis, XMMatrixIdentity());
 	
 		Shot_Draw();
-	
+		
 
 	
 
@@ -240,6 +247,7 @@ void Game_Draw()
 	DebugDraw_Draw();
 	//2D•`‰æ‚Í‚±‚±‚É
 	Direct3D_SetDepthTest(false);
+	Shot_DrawUI();
 	//Score_Draw();
 	/*Billboard_Draw(
 		g_texid,

@@ -1,19 +1,14 @@
 #include "PinManager.h"
 #include "bowlingBall.h"
 using namespace DirectX;
+static constexpr float PIN_SPACING_X = 1.6f;   // 横間隔
+static constexpr float PIN_SPACING_Z = 1.6f;   // 奥行間隔
 
 void PinManager::Initialize()
 {
-    m_pins.clear();
-
-    // ★ ボウリングの基本配置例（簡略）
-    AddPin({ 4.f, 5.0f, 10.0f });
-    AddPin({ 3.f, 5.0f, 13.0f });
-    AddPin({ 0.8f, 0.0f, 1.0f });
-    AddPin({ -1.6f, 0.0f, 2.0f });
-    AddPin({ 0.0f, 0.0f, 2.0f });
-    AddPin({ 1.6f, 0.0f, 2.0f });
+    ResetPins();
 }
+
 void PinManager::Draw()
 {
     for (auto& p : m_pins)
@@ -128,4 +123,34 @@ void PinManager::ResolveBallPinHit(BowlingBall& ball, Pins& pin)
 
     pin.Hit(impulseVec, hitPoint);
 
+}
+void PinManager::SetupBowlingPins(const XMFLOAT3& headPinPos)
+{
+    m_pins.clear();
+
+    static constexpr float DX = 1.6f;
+    static constexpr float DZ = 1.6f;
+
+    // 1段目（1本）
+    AddPin(headPinPos);
+
+    // 2段目（2本）
+    AddPin({ headPinPos.x - DX * 0.5f, headPinPos.y, headPinPos.z + DZ });
+    AddPin({ headPinPos.x + DX * 0.5f, headPinPos.y, headPinPos.z + DZ });
+
+    // 3段目（3本）
+    AddPin({ headPinPos.x - DX, headPinPos.y, headPinPos.z + DZ * 2 });
+    AddPin({ headPinPos.x,       headPinPos.y, headPinPos.z + DZ * 2 });
+    AddPin({ headPinPos.x + DX, headPinPos.y, headPinPos.z + DZ * 2 });
+
+    // 4段目（4本）
+    AddPin({ headPinPos.x - DX * 1.5f, headPinPos.y, headPinPos.z + DZ * 3 });
+    AddPin({ headPinPos.x - DX * 0.5f, headPinPos.y, headPinPos.z + DZ * 3 });
+    AddPin({ headPinPos.x + DX * 0.5f, headPinPos.y, headPinPos.z + DZ * 3 });
+    AddPin({ headPinPos.x + DX * 1.5f, headPinPos.y, headPinPos.z + DZ * 3 });
+}
+void PinManager::ResetPins()
+{
+    // ヘッドピン基準位置
+    SetupBowlingPins({ 4.f, 5.0f, 10.0f });
 }
