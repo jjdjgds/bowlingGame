@@ -28,6 +28,7 @@
 #include "DebugDraw.h"
 #include "Mouselogger.h"
 #include "PinManager.h"
+#include "AuraEffect.h"
 using namespace DirectX;
 
 
@@ -188,7 +189,7 @@ void Game_Update(double elapsed_time)
 		}
 	}
 
-
+	AuraEffect_Update(elapsed_time);
 	
 	
 }
@@ -198,7 +199,8 @@ void Game_Draw()
 
 	Direct3D_SetDepthTest(true);
 	//g_pShotCamera->SetMatrix();
-	
+	g_pDebugCamera->SetMatrix();   // ★これが最重要
+	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
 	//Direct3D_SetDepthWriteDisable();
 	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f, 2.0f }, { 0.7,1 }, {0.5,0.5});
 
@@ -206,7 +208,7 @@ void Game_Draw()
 		//XMMATRIX mtx = XMMatrixScaling(100.0f, 3000.0f, 10000.0f) * XMMatrixTranslation(4.5f, 0.5f, 4.5f);
 		//Cube_Draw(mtx,0);
 	
-	g_pDebugCamera->SetMatrix();   // ★これが最重要
+
 	g_BowlingBall.Draw();
 	g_Pinmanager.Draw();
 
@@ -227,7 +229,7 @@ void Game_Draw()
 		Shot_Draw();
 	
 
-	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
+	
 
 
 

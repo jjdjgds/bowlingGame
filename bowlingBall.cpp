@@ -5,10 +5,11 @@
 #include "DebugDraw.h" // 追加
 #include "Map.h"
 #include "Shot.h"
-
+#include "AuraEffect.h"
+#include "texture.h"
 using namespace DirectX;
 static MODEL* g_pBall{};
-
+static int g_Texid = -1;
 
 BowlingBall::BowlingBall()
 {
@@ -21,6 +22,8 @@ void BowlingBall::Init(const XMFLOAT3& pos)
     g_pBall = ModelLoad("rom\\Model\\ball.fbx", 0.1);
     m_Aabb = g_pBall->Aabb;
     m_Aabb = AABB::Make(GetPosition(), {0.3f,0.3f,0.3f});
+    g_Texid = Texture_Load(L"rom\\Texture\\gra_effect_lightA.png");
+    AuraEffect_Initialize();
 }
 
 void BowlingBall::Update(float deltaTime)
@@ -144,6 +147,9 @@ void BowlingBall::Draw()
     // ここはDirect3D側で円 or モデル描画
     ModelDraw(g_pBall, mtxWorld);
 
+    // 描画例1: プリセット使用
+    AuraEffectParams fireAura = AuraEffect_GetDefaultParams();
+    AuraEffect_Draw(fireAura, mtxWorld);
     // デバッグ描画：AABB を赤いラインで表示
     DebugDraw_AddAABB(m_Aabb, {1.0f, 0.0f, 0.0f, 1.0f});
    // DebugDraw_Draw();
