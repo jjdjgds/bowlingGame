@@ -147,7 +147,7 @@ void Shot_Update(double et)
                     5.0f,
                     MAX_POWER
                 );
-
+                g_Power *= 1.5f;
                 g_IsCharging = false;
                 g_State = ShotState::Aim;
             }

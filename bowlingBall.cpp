@@ -136,6 +136,8 @@ void BowlingBall::Update(float deltaTime)
         m_velocity.x *= 0.98f;
         m_velocity.z *= 0.98f;
     }
+
+   
     Shot_SetPosition(m_position);
 
 }

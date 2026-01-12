@@ -30,6 +30,7 @@
 #include "PinManager.h"
 #include "AuraEffect.h"
 #include "ParticleEffect.h"
+#include "ScoreBoard.h"
 using namespace DirectX;
 
 
@@ -66,6 +67,7 @@ static bool g_BallInPlay = false;
 static AABB g_GoalAABB;
 static bool g_IsGoal = false;
 BowlingBall g_BowlingBall;
+static int g_PrevDownPinCount = 0;
 
 
 PinManager g_Pinmanager;
@@ -79,6 +81,7 @@ void Game_Initialize()
 	g_FixedCameras[0] = new FixedCamera({ -5.0f, 10.0f, 10.0f }, AABB::Make({ 1.0f,5.00f,1.0f }, {5.0f,5.0f,5.0f}));
 	g_FixedCameras[1] = new FixedCamera({5.0f, 10.0f, 10.0f}, AABB::Make({ 6.0f,6.0f,6.0f }, { 20.0f,10.0f,20.0f }));
 	g_BowlingBall.Init({ 3,5,2 });
+	ScoreBoard_Initialize();
 //	Cube01tex = Texture_Load(L"rom\\saikoro_image.png");
 	Billboard_Initialize();
 	Gulid_Initialize(10,10,1);
@@ -111,6 +114,9 @@ void Game_Update(double elapsed_time)
 	g_time += elapsed_time;
 	g_pDebugCamera->Update(elapsed_time);
 	g_BowlingBall.Update(elapsed_time);
+
+
+
 	// ココを追加
 	//Cube_Update(elapsed_time);
 	Shot_Update(elapsed_time);
@@ -167,12 +173,33 @@ void Game_Update(double elapsed_time)
 		g_BallInPlay = false;
 
 		g_ShotCount++;
-		if (g_ShotCount >= MAX_SHOT)
+
+		int totalDown = g_Pinmanager.GetDownPinCount();
+		int fallenPins = totalDown - g_PrevDownPinCount;
+		g_PrevDownPinCount = totalDown;
+
+		// ★ ストライク判定（1投目で10本）
+		bool isStrike = (fallenPins == 10 && g_ShotCount == 1);
+
+		Score_AddThrow(fallenPins);
+
+		if (isStrike)
 		{
+			// ストライク → 即フレーム終了
 			g_Pinmanager.ResetPins();
+			g_PrevDownPinCount = 0;
+			g_ShotCount = 0;
+		}
+		else if (g_ShotCount >= MAX_SHOT)
+		{
+			// 通常2投終了
+			g_Pinmanager.ResetPins();
+			g_PrevDownPinCount = 0;
 			g_ShotCount = 0;
 		}
 	}
+
+
 
 
 
@@ -255,6 +282,9 @@ void Game_Draw()
 	//2D描画はここに
 	Direct3D_SetDepthTest(false);
 	Shot_DrawUI();
+	ScoreBoard_Draw();
+
+
 	//Score_Draw();
 	/*Billboard_Draw(
 		g_texid,

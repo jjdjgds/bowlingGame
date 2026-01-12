@@ -10,7 +10,7 @@ public:
     void Draw();
     void SetupBowlingPins(const DirectX::XMFLOAT3& headPinPos);
     void ResetPins();
-
+    int GetDownPinCount() const;
     void AddPin(const DirectX::XMFLOAT3& pos);
     void ResolveBallPinHit(BowlingBall& ball, Pins& pin);
 private:

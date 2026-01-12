@@ -81,7 +81,7 @@ void Map_Initialize()
             block.SetAABB(AABB::Make(block.GetPosition(), { 1.0, 1.0, 1.0 }));
             break;
         case Block::GOAL:
-            block.SetAABB(AABB::Make(block.GetPosition(), { 1.0, 1.0, 1.0 }));
+           // block.SetAABB(AABB::Make(block.GetPosition(), { 1.0, 1.0, 1.0 }));
             break;
 
         case Block::UFO:

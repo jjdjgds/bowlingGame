@@ -154,3 +154,15 @@ void PinManager::ResetPins()
     // ヘッドピン基準位置
     SetupBowlingPins({ 4.f, 5.0f, 10.0f });
 }
+
+int PinManager::GetDownPinCount() const
+{
+    int down = 0;
+    for (const auto& p : m_pins)
+    {
+        if (p.IsDown() || p.IsDead())
+            down++;
+    }
+    return down;
+}
+

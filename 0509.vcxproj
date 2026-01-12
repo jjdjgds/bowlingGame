@@ -176,6 +176,7 @@
     <ClCompile Include="polygon.cpp" />
     <ClCompile Include="result.cpp" />
     <ClCompile Include="scene.cpp" />
+    <ClCompile Include="ScoreBoard.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shader3d.cpp" />
     <ClCompile Include="ShaderBillBoard.cpp" />
@@ -227,6 +228,7 @@
     <ClInclude Include="game_score.h" />
     <ClInclude Include="result.h" />
     <ClInclude Include="scene.h" />
+    <ClInclude Include="ScoreBoard.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="shader3d.h" />
     <ClInclude Include="ShaderBillBoard.h" />
