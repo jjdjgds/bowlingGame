@@ -15,6 +15,10 @@ public:
     void ResolveBallPinHit(BowlingBall& ball, Pins& pin);
     int GetRemainingPinCount() const;
     int GetInitialPinCount() const;
+    void RemoveDeadPins();
+
+    // 新: 全ピンを破棄して再配置（"1フレーム終わるごとに" 呼ぶ目的）
+    void DestroyAndRecreatePins();
 
 private:
     void ResolvePinPin(Pins& a, Pins& b);

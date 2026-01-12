@@ -44,18 +44,7 @@ void PinManager::Update(float dt, BowlingBall& ball)
             ResolvePinPin(m_pins[i], m_pins[j]);
         }
     }
-    // ★ 死んだピンを削除
-    m_pins.erase(
-        std::remove_if(
-            m_pins.begin(),
-            m_pins.end(),
-            [](const Pins& p)
-            {
-                return p.IsDead();
-            }
-        ),
-        m_pins.end()
-    );
+   
 }
 
 void PinManager::AddPin(const XMFLOAT3& pos)
@@ -124,9 +113,30 @@ void PinManager::ResolveBallPinHit(BowlingBall& ball, Pins& pin)
     pin.Hit(impulseVec, hitPoint);
 
 }
+
+// 変更: RemoveDeadPins は消すのではなくオフスクリーン移動に変更
+void PinManager::RemoveDeadPins()
+{
+    for (auto& p : m_pins)
+    {
+        if (p.IsDead())
+        {
+            // オフスクリーンに移動して描画しないようにする
+            p.MoveOffscreen(100.0f);
+        }
+    }
+}
+
+// 既存の GetRemainingPinCount を「生きているピン数」を返す実装にしてある想定
 int PinManager::GetRemainingPinCount() const
 {
-    return static_cast<int>(m_pins.size());
+    int remaining = 0;
+    for (const auto& p : m_pins)
+    {
+        if (!p.IsDead())
+            ++remaining;
+    }
+    return remaining;
 }
 
 int PinManager::GetInitialPinCount() const
@@ -159,6 +169,7 @@ void PinManager::SetupBowlingPins(const XMFLOAT3& headPinPos)
     AddPin({ headPinPos.x + DX * 0.5f, headPinPos.y, headPinPos.z + DZ * 3 });
     AddPin({ headPinPos.x + DX * 1.5f, headPinPos.y, headPinPos.z + DZ * 3 });
 }
+
 void PinManager::ResetPins()
 {
     // ヘッドピン基準位置
@@ -174,5 +185,12 @@ int PinManager::GetDownPinCount() const
             down++;
     }
     return down;
+}
+
+// 新: 1フレーム（ボウリングのフレーム）終わりで全部破棄して再配置する関数
+void PinManager::DestroyAndRecreatePins()
+{
+    m_pins.clear();
+    SetupBowlingPins({ 4.f, 5.0f, 10.0f });
 }
 

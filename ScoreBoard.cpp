@@ -66,9 +66,6 @@ void ScoreBoard_Initialize()
     }
     g_CurrentFrame = 0;
     g_CurrentThrow = 0;
-
-   
-
 }
 
 float GetSymbolSrcY(int symbol)
@@ -92,7 +89,9 @@ void DrawSymbol(
     float scale
 )
 {
+    // SYMBOL_NONE を無視
     if (symbol < 0) return;
+    if (symbol == SYMBOL_NONE) return;
 
     int col = symbol % SHEET_COLS;
 
@@ -114,10 +113,26 @@ void DrawSymbol(
 }
 
 
+// Score_AddThrow の堅牢化:
+// - pins を 0..10 にクランプ
+// - 2投目がフレーム合計で 10 を超えないように調整（物理的に発生するときの保険）
+// - 不整合が起きた場合、デバッグ出力で警告する
 void Score_AddThrow(int pins)
 {
+    // デバッグログ追加：Score_AddThrow に渡される値を確実に出力する
+    hal::dout << "Score_AddThrow called: pins=" << pins
+              << " currentFrame=" << g_CurrentFrame
+              << " currentThrow=" << g_CurrentThrow << std::endl;
+
     if (g_CurrentFrame >= FRAME_COUNT)
         return;
+
+    // 基本的なクランプ
+    if (pins < 0) pins = 0;
+    if (pins > 10) {
+        hal::dout << "  Warning: pins clamped from " << pins << " to 10" << std::endl;
+        pins = 10;
+    }
 
     Frame& f = g_Frames[g_CurrentFrame];
 
@@ -126,9 +141,14 @@ void Score_AddThrow(int pins)
     {
         f.throw1 = pins;
 
-        // ストライクなら次フレーム
+        // デバッグ：割り当て後の状態
+        hal::dout << "  Assigned throw1=" << f.throw1 << " (frame " << g_CurrentFrame << ")" << std::endl;
+
+        // ストライクなら次フレーム（既存挙動）
         if (pins == 10)
         {
+            // 明示的に throw2 は空のままにしておく
+            f.throw2 = -1;
             g_CurrentFrame++;
             g_CurrentThrow = 0;
         }
@@ -140,7 +160,23 @@ void Score_AddThrow(int pins)
     // 2投目
     else
     {
+        // 保険：1投目が既に記録されている前提で、合計が10を超えないようにする
+        if (f.throw1 < 0) {
+            // 想定外の状態だが保護する
+            hal::dout << "  Warning: throw1 was not set for frame " << g_CurrentFrame << std::endl;
+            f.throw1 = 0;
+        }
+
+        int maxSecond = 10 - f.throw1;
+        if (pins > maxSecond) {
+            hal::dout << "  Warning: second throw pins (" << pins << ") exceed frame limit, clamped to " << maxSecond << std::endl;
+            pins = maxSecond;
+        }
+
         f.throw2 = pins;
+
+        hal::dout << "  Assigned throw2=" << f.throw2 << " (frame " << g_CurrentFrame << ")" << std::endl;
+
         g_CurrentFrame++;
         g_CurrentThrow = 0;
     }
@@ -152,6 +188,16 @@ void Score_Recalculate()
 
 void ScoreBoard_Draw()
 {
+    // デバッグ：現在保持しているフレーム情報を毎フレーム出力（調査用）
+    {
+        std::ostringstream oss;
+        oss << "ScoreBoard frames:";
+        for (int i = 0; i < FRAME_COUNT; ++i) {
+            oss << " [" << i << "](" << g_Frames[i].throw1 << "," << g_Frames[i].throw2 << ")";
+        }
+        hal::dout << oss.str() << std::endl;
+    }
+
     Sprite_Draw(
         g_ScoreBoardTexId,
         0.0f,
@@ -214,20 +260,23 @@ void ScoreBoard_Draw()
             constexpr float SUM_SCALE = 0.32f;
             float digitW = CELL_W * SUM_SCALE;
 
-            // 10の位
-            DrawSymbol(
-                g_NumberTexId,
-                sum / 10,
-                frameX + 24.0f,
-                startY + lowerRowHeight,
-                SUM_SCALE
-            );
+            // 10の位：10未満は表示しない（現在は先頭に不要な 0 が出ていたため）
+            if (sum >= 10)
+            {
+                DrawSymbol(
+                    g_NumberTexId,
+                    sum / 10,
+                    frameX + 24.0f,
+                    startY + lowerRowHeight,
+                    SUM_SCALE
+                );
+            }
 
-            // 1の位（← 正しい間隔）
+            // 1の位（常に表示）
             DrawSymbol(
                 g_NumberTexId,
                 sum % 10,
-                frameX + 24.0f + digitW-30,
+                frameX + 24.0f + (sum >= 10 ? (digitW - 30) : 0.0f),
                 startY + lowerRowHeight,
                 SUM_SCALE
             );

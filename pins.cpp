@@ -5,6 +5,8 @@ using namespace DirectX;
 
 static constexpr float GRAVITY = -9.8f;
 static constexpr float FLOOR_Y = 0.0f;
+// 追加: X/Z 移動で倒れたと判定する閾値（調整可）
+static constexpr float POSITION_MOVE_THRESHOLD = 0.15f;
 
 Pins::Pins()
     : m_position{ 0,0,0 }
@@ -14,7 +16,6 @@ Pins::Pins()
     , m_isDown(false)
     , m_mass(1.0f)
 {
-	//m_Aabb = AABB::Make(m_position, { 0.5f,0.5f,0.5f });
 }
 
 void Pins::Initialize(const XMFLOAT3& pos)
@@ -25,34 +26,50 @@ void Pins::Initialize(const XMFLOAT3& pos)
     m_scale = { 1,1,1 };
     m_angularVelocity = { 0,0,0 };
     m_isDown = false;
+    m_isDead = false;
+    m_isHit = false;
+    m_aliveTime = 0.0f;
+    m_lifeTimer = 0.0f;
 
     m_model = ModelLoad("rom\\Model\\Pins.fbx");
 
-    // ★ モデル基準サイズ（スケール1.0時）
     m_baseHalf = { 1.5f, 3.f, 1.5f };
 
-    // 初期AABB生成
     m_Aabb = AABB::Make(m_position, m_baseHalf);
+
+    // 生成時の基準位置を保存（X/Z の動きをここから判定する）
+    m_spawnPosition = pos;
 }
-
-
 
 void Pins::Update(float deltaTime)
 {
-    // ===== 重力 =====
+    if (m_isDead) {
+        // 死亡扱いなら物理更新を止める（オフスクリーンに移動済み）
+        // ただし AABB は位置に合わせて更新しておく
+        XMFLOAT3 half =
+        {
+            m_baseHalf.x * m_scale.x,
+            m_baseHalf.y * m_scale.y,
+            m_baseHalf.z * m_scale.z
+        };
+        XMFLOAT3 aabbCenter = m_position;
+        aabbCenter.y += half.y;
+        m_Aabb.SetCenter(half);
+        m_Aabb.Move(aabbCenter);
+        return;
+    }
+
+    // 通常の物理更新
     m_velocity.y += GRAVITY * deltaTime;
 
-    // ===== 位置更新 =====
     m_position.x += m_velocity.x * deltaTime;
     m_position.y += m_velocity.y * deltaTime;
     m_position.z += m_velocity.z * deltaTime;
 
-    // ===== 回転更新 =====
     m_rotation.x += m_angularVelocity.x * deltaTime;
     m_rotation.y += m_angularVelocity.y * deltaTime;
     m_rotation.z += m_angularVelocity.z * deltaTime;
 
-    // ===== 床 =====
     if (m_position.y < FLOOR_Y)
     {
         m_position.y = FLOOR_Y;
@@ -64,26 +81,24 @@ void Pins::Update(float deltaTime)
         m_angularVelocity.z *= 0.9f;
     }
 
-    // ===== 倒れ判定 =====
+    // 回転による倒れ判定（従来通り）
     if (fabsf(m_rotation.x) > XM_PIDIV4 || fabsf(m_rotation.z) > XM_PIDIV4)
     {
         m_isDown = true;
     }
 
-    // ===== ★ AABBサイズ更新 =====
-    XMFLOAT3 half =
-    {
-        m_baseHalf.x * m_scale.x,
-        m_baseHalf.y * m_scale.y,
-        m_baseHalf.z * m_scale.z
-    };
+    // 追加: 生成位置からの X/Z の変位が閾値を超えたら倒れたと判定
+    if (!m_isDown) {
+        float dx = fabsf(m_position.x - m_spawnPosition.x);
+        float dz = fabsf(m_position.z - m_spawnPosition.z);
+        if (dx > POSITION_MOVE_THRESHOLD || dz > POSITION_MOVE_THRESHOLD) {
+            m_isDown = true;
+        }
+    }
 
-    // ★ 吹き飛び判定
     if (m_isDown)
     {
         m_aliveTime += deltaTime;
-
-        // 例：3秒後に消える
         if (m_aliveTime > 3.0f)
         {
             m_isDead = true;
@@ -98,18 +113,27 @@ void Pins::Update(float deltaTime)
         }
     }
 
-    // ★ AABB中心を下にずらす
+    XMFLOAT3 half =
+    {
+        m_baseHalf.x * m_scale.x,
+        m_baseHalf.y * m_scale.y,
+        m_baseHalf.z * m_scale.z
+    };
+
     XMFLOAT3 aabbCenter = m_position;
-    aabbCenter.y += half.y;   // ← ここが修正点
+    aabbCenter.y += half.y;
 
     m_Aabb.SetCenter(half);
     m_Aabb.Move(aabbCenter);
-
 }
 
 void Pins::Draw()
 {
-    // ★ 描画用オフセット（底合わせ）
+    if (m_isDead) {
+        // オフスクリーンに移動済みなら描画しない
+        return;
+    }
+
     float drawOffsetY = m_baseHalf.y * m_scale.y;
 
     XMMATRIX mtxworld =
@@ -119,7 +143,7 @@ void Pins::Draw()
         XMMatrixRotationZ(m_rotation.z) *
         XMMatrixTranslation(
             m_position.x,
-            m_position.y + drawOffsetY, // ← ここ重要
+            m_position.y + drawOffsetY,
             m_position.z
         );
 
@@ -135,12 +159,10 @@ void Pins::Hit(const XMFLOAT3& impulse, const XMFLOAT3& hitPoint)
         m_lifeTimer = 0.0f;
     }
 
-    // 線形インパルス
     m_velocity.x += impulse.x / m_mass;
     m_velocity.y += impulse.y / m_mass;
     m_velocity.z += impulse.z / m_mass;
 
-    // 回転インパルス（簡易）
     XMVECTOR r = XMLoadFloat3(&hitPoint) - XMLoadFloat3(&m_position);
     XMVECTOR f = XMLoadFloat3(&impulse);
 
@@ -157,4 +179,41 @@ void Pins::Hit(const XMFLOAT3& impulse, const XMFLOAT3& hitPoint)
 bool Pins::IsDown() const
 {
     return m_isDown;
+}
+
+// 新: 指定X位置へ移動し死亡扱いにする
+void Pins::MoveOffscreen(float x)
+{
+    m_position.x = x;
+    m_velocity = { 0,0,0 };
+    m_angularVelocity = { 0,0,0 };
+    m_isDead = true;
+
+    // AABB を位置に合わせる
+    XMFLOAT3 half =
+    {
+        m_baseHalf.x * m_scale.x,
+        m_baseHalf.y * m_scale.y,
+        m_baseHalf.z * m_scale.z
+    };
+    XMFLOAT3 aabbCenter = m_position;
+    aabbCenter.y += half.y;
+    m_Aabb.SetCenter(half);
+    m_Aabb.Move(aabbCenter);
+}
+
+// 新: 明示的に位置をセットする
+void Pins::SetPosition(const XMFLOAT3& pos)
+{
+    m_position = pos;
+    XMFLOAT3 half =
+    {
+        m_baseHalf.x * m_scale.x,
+        m_baseHalf.y * m_scale.y,
+        m_baseHalf.z * m_scale.z
+    };
+    XMFLOAT3 aabbCenter = m_position;
+    aabbCenter.y += half.y;
+    m_Aabb.SetCenter(half);
+    m_Aabb.Move(aabbCenter);
 }

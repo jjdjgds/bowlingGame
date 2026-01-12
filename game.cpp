@@ -31,6 +31,9 @@
 #include "AuraEffect.h"
 #include "ParticleEffect.h"
 #include "ScoreBoard.h"
+
+#include "debug_ostream.h" // 追加：ログ出力用
+
 using namespace DirectX;
 
 
@@ -69,11 +72,14 @@ static bool g_IsGoal = false;
 BowlingBall g_BowlingBall;
 static int g_PrevDownPinCount = 0;
 static float g_PinSettleTimer = 0.0f;
-static constexpr float PIN_SETTLE_TIME = 1.0f; // 1秒待つ
+// 余裕を増やして誤判定を減らす
+static constexpr float PIN_SETTLE_TIME = 1.5f; // 1秒 -> 1.5秒に変更
 static bool g_WaitingPinSettle = false;
 static int g_FrameCount = 0;
 static constexpr int MAX_FRAME = 4;
 static int g_PrevDownPinsThisThrow = 0;
+// 追加: 投球時に残っていたピン数（Remove/削除を考慮した確実な差分算出に使用）
+static int g_PrevRemainingPinsThisThrow = 0;
 
 
 PinManager g_Pinmanager;
@@ -143,9 +149,9 @@ void Game_Update(double elapsed_time)
 	}
 	g_FixedCameras[g_FixedCameraIndex]->SetMatrix();
 	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
-
-	//Trail_SetCameraPosition(g_FixedCameras[g_FixedCameraIndex]->GetPosition());
-
+	//Direct3D_SetDepthTest(true);
+	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f, 2.0f }, { 0.7,1 }, {0.5,0.5});
+	
 
 	Score_Update();
 	if (KeyLogger_IsPressed(KK_R))
@@ -164,6 +170,15 @@ void Game_Update(double elapsed_time)
 
 	if (!g_BallInPlay && fired)
 	{
+		// 投球直前の倒れているピン数を記録（基準）
+		g_PrevDownPinsThisThrow = g_Pinmanager.GetDownPinCount();
+		// 追加: 投球直前の「残っているピン数」も記録しておく（削除を踏まえた差分算出用）
+		g_PrevRemainingPinsThisThrow = g_Pinmanager.GetRemainingPinCount();
+
+		// デバッグログ：投球時の基準値
+		hal::dout << "Shot fired. prevDownPinsThisThrow=" << g_PrevDownPinsThisThrow
+			<< " prevRemaining=" << g_PrevRemainingPinsThisThrow << std::endl;
+
 		g_BowlingBall.AddForce(Shot_GetShotVelocity());
 		Shot_ResetPower();
 		g_BallInPlay = true;
@@ -173,7 +188,7 @@ void Game_Update(double elapsed_time)
 		g_BallInPlay = false;
 		g_WaitingPinSettle = true;
 		g_PinSettleTimer = 0.0f;
-		g_PrevDownPinsThisThrow = g_Pinmanager.GetDownPinCount();
+		// ※ 記録は投球時に行うためここで上書きしない
 	}
 	if (g_WaitingPinSettle)
 	{
@@ -183,23 +198,48 @@ void Game_Update(double elapsed_time)
 		{
 			g_WaitingPinSettle = false;
 
-			g_BowlingBall.Reset(BALL_START_POS);
 
 			g_ShotCount++;
 
-			int nowDown = g_Pinmanager.GetDownPinCount();
-			int fallenPins = nowDown - g_PrevDownPinsThisThrow;
+			// --- 変更: 倒れた本数の算出を RemoveDeadPins 後の残数差分に変更 ---
+			// RemoveDeadPins に依存すると dead フラグの遅延で不安定になるため、
+			// 投球時の remaining から RemoveDeadPins 後の remaining を引く方法に変更します。
 
-			// 念のため安全側
-			fallenPins = GameClamp(fallenPins, 0, 10);
+			// デバッグログ（確定前）
+			int nowDown = g_Pinmanager.GetDownPinCount();
+			hal::dout << "Pin settle (before remove): prevDown=" << g_PrevDownPinsThisThrow
+				<< " nowDown=" << nowDown
+				<< " prevRemaining=" << g_PrevRemainingPinsThisThrow
+				<< std::endl;
+
+			// 実際に死んだピンを削除（ここで remaining が減る）
+			g_Pinmanager.RemoveDeadPins();
+
+			int remainingAfterRemove = g_Pinmanager.GetRemainingPinCount();
+
+			// 投球時の残数 - 現在の残数 = 今回倒れた本数
+			int fallenPins = g_PrevRemainingPinsThisThrow - remainingAfterRemove;
+			if (fallenPins < 0) fallenPins = 0;
+			fallenPins = static_cast<int>(GameClamp((float)fallenPins, 0.0f, 10.0f));
+
+			// デバッグログ：確定時の情報（削除後ベース）
+			hal::dout << "Pin settle (after remove): remainingAfterRemove=" << remainingAfterRemove
+				<< " computedFallen=" << fallenPins
+				<< std::endl;
 
 			bool isStrike = (fallenPins == 10 && g_ShotCount == 1);
 			Score_AddThrow(fallenPins);
 
+			// デバッグログ：RemoveDeadPins 後の残数/ダウン数
+			hal::dout << "After RemoveDeadPins, remainingPins=" << g_Pinmanager.GetRemainingPinCount()
+				<< " downCount=" << g_Pinmanager.GetDownPinCount() << std::endl;
+
+			g_BowlingBall.Reset(BALL_START_POS);
 
 			if (isStrike || g_ShotCount >= MAX_SHOT)
 			{
-				g_Pinmanager.ResetPins();
+				// g_Pinmanager.ResetPins();
+				g_Pinmanager.DestroyAndRecreatePins(); // <- ここを変更
 				g_PrevDownPinCount = 0;
 				g_ShotCount = 0;
 				// ★ フレーム進行
@@ -214,12 +254,6 @@ void Game_Update(double elapsed_time)
 			}
 		}
 	}
-
-
-
-
-
-
 
 	g_Pinmanager.Update(elapsed_time, g_BowlingBall);
 
@@ -261,12 +295,8 @@ void Game_Draw()
 	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
 	//Direct3D_SetDepthWriteDisable();
 	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f, 2.0f }, { 0.7,1 }, {0.5,0.5});
-
-
-		//XMMATRIX mtx = XMMatrixScaling(100.0f, 3000.0f, 10000.0f) * XMMatrixTranslation(4.5f, 0.5f, 4.5f);
-		//Cube_Draw(mtx,0);
 	
-	
+
 	g_BowlingBall.Draw();
 	g_Pinmanager.Draw();
 
@@ -287,12 +317,13 @@ void Game_Draw()
 		Shot_Draw();
 		
 
+
 	
 
 
 
 	//Billboard_Draw(g_texid, g_BowlingBall.GetWorldMatrix(),
-	//	{ 140.0f,200.0f }, { 0.0f,0.0f }); // world を Identity にするか、任意のワールド行列を渡す
+	//	{ 140.0f,200.0f }, { 140.0f,145.0f }); // world を Identity にするか、任意のワールド行列を渡す
 	//
 	Map_Draw();
 	DebugDraw_Draw();
@@ -315,7 +346,7 @@ void Game_Draw()
 
 	//Billboard_Draw(g_texid, XMMatrixTranslation(3.0, 2.0f, 2.0f), 
 	//	{ 140.0f,200.0f }, { 14.0f,20.0f }); // world を Identity にするか、任意のワールド行列を渡す
-	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f, 2.0f }, { 0.14,0.2 });
+	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f }, { 0.14,0.2 });
 	if(g_IsGoal)
 	{
 		XMFLOAT3 pos = g_GoalAABB.GetCenter();
