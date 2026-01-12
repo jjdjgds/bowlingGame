@@ -1,4 +1,4 @@
-// ScoreBoard.cpp
+ï»¿// ScoreBoard.cpp
 #include "ScoreBoard.h"
 #include "debug_text.h"
 #include "debug_ostream.h"
@@ -7,10 +7,42 @@
 #include "direct3d.h"
 
 static int g_ScoreBoardTexId = -1;
+static int g_NumberTexId = -1;
 static constexpr int FRAME_COUNT = 4;
-static hal::DebugText* g_DebugText = nullptr;
-static hal::DebugText* g_DebugText1 = nullptr;
-static hal::DebugText* g_DebugText2 = nullptr;
+static constexpr float DIGIT_W = 64.0f;
+static constexpr float DIGIT_H = 64.0f;
+static constexpr int DIGIT_COLS = 5;
+static constexpr float CELL_W = 200.0f;
+static constexpr float CELL_H_NUM = 180.0f;   // 0ã€œ9
+static constexpr float CELL_H_SYM = 185.0f;   // X / -
+constexpr float SCALE_THROW = 0.45f; // ä¸Šæ®µï¼ˆæŠ•çƒï¼‰
+constexpr float SCALE_SUM = 0.55f; // ä¸‹æ®µï¼ˆåˆè¨ˆï¼‰
+
+static constexpr int SHEET_COLS = 5;
+constexpr float startX = 0.0f;
+constexpr float startY = 230.0f;
+constexpr float frameW = 430.0f / FRAME_COUNT;
+constexpr float throwSpacing = CELL_W * SCALE_THROW + 6.0f;
+constexpr float lowerRowHeight = CELL_H_NUM * SCALE_THROW + 10.0f;
+
+//constexpr float lowerRowHeight = 64.0f;
+
+enum DigitSymbol
+{
+    DIGIT_0 = 0,
+    DIGIT_1,
+    DIGIT_2,
+    DIGIT_3,
+    DIGIT_4,
+    DIGIT_5,
+    DIGIT_6,
+    DIGIT_7,
+    DIGIT_8,
+    DIGIT_9,
+    SYMBOL_X,     // 10
+    SYMBOL_SPARE, // 11
+    SYMBOL_NONE,  // 12ï¼ˆç©ºç™½ï¼‰
+};
 
 struct Frame
 {
@@ -27,7 +59,7 @@ static int g_CurrentThrow = 0;
 void ScoreBoard_Initialize()
 {
     g_ScoreBoardTexId = Texture_Load(L"rom\\Texture\\bord.jpg");
-
+    g_NumberTexId     = Texture_Load(L"rom\\Texture\\Number.png");
     for (int i = 0; i < FRAME_COUNT; ++i)
     {
         g_Frames[i] = {};
@@ -35,39 +67,52 @@ void ScoreBoard_Initialize()
     g_CurrentFrame = 0;
     g_CurrentThrow = 0;
 
-    // --- DebugText ì¬ ---
-    //delete g_DebugText;
-    g_DebugText = new hal::DebugText(
-        Direct3D_GetDevice(),
-        Direct3D_GetContext(),
-        L"rom/consolab_ascii_512.png",
-        (float)Direct3D_GetBackBufferWidth(),
-        (float)Direct3D_GetBackBufferHeight(),
-        0.0f,
-        0.0f
-    );
-    //delete g_DebugText1;
-    g_DebugText1 = new hal::DebugText(
-        Direct3D_GetDevice(),
-        Direct3D_GetContext(),
-        L"rom/consolab_ascii_512.png",
-        (float)Direct3D_GetBackBufferWidth(),
-        (float)Direct3D_GetBackBufferHeight(),
-        0.0f,
-        0.0f
-    );
-    //delete g_DebugText2;
-    g_DebugText2 = new hal::DebugText(
-        Direct3D_GetDevice(),
-        Direct3D_GetContext(),
-        L"rom/consolab_ascii_512.png",
-        (float)Direct3D_GetBackBufferWidth(),
-        (float)Direct3D_GetBackBufferHeight(),
-        0.0f,
-        0.0f
-    );
+   
 
 }
+
+float GetSymbolSrcY(int symbol)
+{
+    if (symbol <= DIGIT_9)      return 0.0f;            // 0â€“9
+    else if (symbol <= SYMBOL_SPARE) return CELL_H_NUM * 2; // X /
+    else                         return CELL_H_NUM * 2; // ç©ºç™½
+}
+float GetSymbolHeight(int symbol)
+{
+    if (symbol <= DIGIT_9) return CELL_H_NUM;
+    else                  return CELL_H_SYM;
+}
+
+
+void DrawSymbol(
+    int texId,
+    int symbol,
+    float x,
+    float y,
+    float scale
+)
+{
+    if (symbol < 0) return;
+
+    int col = symbol % SHEET_COLS;
+
+    float srcY = GetSymbolSrcY(symbol);
+    float srcH = GetSymbolHeight(symbol);
+
+    Sprite_Draw(
+        texId,
+        x,
+        y,
+        CELL_W * scale,
+        srcH * scale,
+        col * CELL_W,
+        srcY,
+        CELL_W,
+        srcH,
+        {0,0,0,1}
+    );
+}
+
 
 void Score_AddThrow(int pins)
 {
@@ -76,12 +121,12 @@ void Score_AddThrow(int pins)
 
     Frame& f = g_Frames[g_CurrentFrame];
 
-    // 1“Š–Ú
+    // 1æŠ•ç›®
     if (g_CurrentThrow == 0)
     {
         f.throw1 = pins;
 
-        // ƒXƒgƒ‰ƒCƒN‚È‚çŸƒtƒŒ[ƒ€
+        // ã‚¹ãƒˆãƒ©ã‚¤ã‚¯ãªã‚‰æ¬¡ãƒ•ãƒ¬ãƒ¼ãƒ 
         if (pins == 10)
         {
             g_CurrentFrame++;
@@ -92,7 +137,7 @@ void Score_AddThrow(int pins)
             g_CurrentThrow = 1;
         }
     }
-    // 2“Š–Ú
+    // 2æŠ•ç›®
     else
     {
         f.throw2 = pins;
@@ -115,78 +160,78 @@ void ScoreBoard_Draw()
         0.0f, 0.0f,
         430.0f, 145.0f);
 
-    if (!g_DebugText)
-        return;
+    constexpr float startX = 0.0f;
+    constexpr float startY = 100.0f;
+    constexpr float frameW = 430.0f / FRAME_COUNT;
+    constexpr float throwSpacing = 11.0f;
+    constexpr float lowerRowHeight = 64.0f;
+    constexpr float THROW_SCALE = 0.3f;
+    float throwDigitW = CELL_W * THROW_SCALE;
 
-    // š –ˆƒtƒŒ[ƒ€•K{ - ƒeƒLƒXƒg‚ğƒNƒŠƒA
-    g_DebugText->Clear();
-    g_DebugText->SetScale(1.4f);
-    g_DebugText1->Clear();
-    g_DebugText1->SetScale(1.4f);
-    g_DebugText2->Clear();
-    g_DebugText2->SetScale(1.4f);
-    g_DebugText->SetOffset(0.0f, 0.0f);
-    g_DebugText1->SetOffset(0.0f, 0.0f);
-    g_DebugText2->SetOffset(0.0f, 0.0f);
-    // ƒXƒRƒAƒ{[ƒh‚ÌƒŒƒCƒAƒEƒg‚É‡‚í‚¹‚½”z’u
-    constexpr float startX = 0.0f;      // ¶’[‚ÌŠJnˆÊ’u
-    constexpr float startY = 100.0f;     // ã’i‚ÌŠJnˆÊ’u
-    constexpr float frameW = 107.5f;     // ƒtƒŒ[ƒ€ŠÔŠu (430 / 4)
-    constexpr float throwSpacing = 50.0f; // 1“Š–Ú‚Æ2“Š–Ú‚ÌŠÔŠu
-    constexpr float upperRowHeight = 20.0f;  // ã’ii“Š‹…Œ‹‰Êj
-    constexpr float lowerRowHeight = 70.0f; // ‰º’ii‡ŒvƒXƒRƒAj
-
-    // š ŠeƒtƒŒ[ƒ€‚ğ‰¡‚É•À‚×‚ÄŒÂ•Ê‚É•`‰æ
     for (int i = 0; i < FRAME_COUNT; ++i)
     {
         const Frame& f = g_Frames[i];
-        float frameX = startX + i * frameW;
-		hal::dout << frameX<< std::endl;
-        // --- ã’i: 1“Š–Ú•\¦i¶‘¤‚Ì¬‚³‚¢ƒZƒ‹j ---
+        float frameX = startX + frameW * i;
+
+        // --- 1æŠ•ç›® ---
         if (f.throw1 >= 0)
         {
-            char throw1Str[8];
-            if (f.throw1 == 10)
-                strcpy_s(throw1Str, "X");
-            else
-                sprintf_s(throw1Str, "%d", f.throw1);
-            g_DebugText->SetOffset(0.0f, 0.0f);
-            g_DebugText->SetOffset(frameX + 20.0f, startY );
-            g_DebugText->SetText(throw1Str, { 0, 0, 0, 1 });
-            
+            int symbol =
+                (f.throw1 == 10) ? SYMBOL_X :
+                f.throw1;
+
+            DrawSymbol(
+                g_NumberTexId,
+                symbol,
+                frameX + 16.0f,
+                startY,
+                0.3f
+            );
         }
 
-        // --- ã’i: 2“Š–Ú•\¦i‰E‘¤‚Ì¬‚³‚¢ƒZƒ‹j ---
+        // --- 2æŠ•ç›® ---
         if (f.throw2 >= 0)
         {
-            char throw2Str[8];
-            // ƒXƒyƒA”»’è: 1“Š–Ú‚ª10–¢–‚ÅA‡Œv‚ª10
-            if (f.throw1 < 10 && f.throw1 + f.throw2 == 10)
-                strcpy_s(throw2Str, "/");
-            else
-                sprintf_s(throw2Str, "%d", f.throw2);
-            g_DebugText1->SetOffset(0.0f, 0.0f);
-            g_DebugText1->SetOffset(frameX + 20.0f + throwSpacing, startY + upperRowHeight);
-            g_DebugText1->SetText(throw2Str, { 0, 0, 1, 1 });
-            
+            int symbol =
+                (f.throw1 < 10 && f.throw1 + f.throw2 == 10)
+                ? SYMBOL_SPARE
+                : f.throw2;
+
+            DrawSymbol(
+                g_NumberTexId,
+                symbol,
+                frameX + 5.0f + throwDigitW + 6.0f,
+                startY,
+                0.3f
+            );
         }
 
-        // --- ‰º’i: ƒtƒŒ[ƒ€‡Œv•\¦i‘å‚«‚¢ƒZƒ‹j ---
+        // --- ãƒ•ãƒ¬ãƒ¼ãƒ åˆè¨ˆ ---
         if (f.throw1 >= 0)
         {
             int sum = f.throw1 + (f.throw2 >= 0 ? f.throw2 : 0);
-            char sumStr[8];
-            sprintf_s(sumStr, "%d", sum);
-            g_DebugText2->SetOffset(0.0f, 0.0f);
-            g_DebugText2->SetOffset(frameX + 30.0f, startY + lowerRowHeight);
-            g_DebugText2->SetText(sumStr, { 1, 0, 0, 1 });
-           
-          
-        }
-    }
 
-    // š ÅŒã‚É1‰ñ‚¾‚¯Draw‚ğŒÄ‚Ô
-    g_DebugText->Draw();
-    g_DebugText1->Draw();
-    g_DebugText2->Draw();
+            constexpr float SUM_SCALE = 0.32f;
+            float digitW = CELL_W * SUM_SCALE;
+
+            // 10ã®ä½
+            DrawSymbol(
+                g_NumberTexId,
+                sum / 10,
+                frameX + 24.0f,
+                startY + lowerRowHeight,
+                SUM_SCALE
+            );
+
+            // 1ã®ä½ï¼ˆâ† æ­£ã—ã„é–“éš”ï¼‰
+            DrawSymbol(
+                g_NumberTexId,
+                sum % 10,
+                frameX + 24.0f + digitW-30,
+                startY + lowerRowHeight,
+                SUM_SCALE
+            );
+        }
+
+    }
 }
