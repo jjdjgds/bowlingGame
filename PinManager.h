@@ -13,6 +13,9 @@ public:
     int GetDownPinCount() const;
     void AddPin(const DirectX::XMFLOAT3& pos);
     void ResolveBallPinHit(BowlingBall& ball, Pins& pin);
+    int GetRemainingPinCount() const;
+    int GetInitialPinCount() const;
+
 private:
     void ResolvePinPin(Pins& a, Pins& b);
 

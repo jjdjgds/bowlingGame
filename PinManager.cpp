@@ -124,6 +124,16 @@ void PinManager::ResolveBallPinHit(BowlingBall& ball, Pins& pin)
     pin.Hit(impulseVec, hitPoint);
 
 }
+int PinManager::GetRemainingPinCount() const
+{
+    return static_cast<int>(m_pins.size());
+}
+
+int PinManager::GetInitialPinCount() const
+{
+    return 10; // ç°ÇÕå≈íËÇ≈OK
+}
+
 void PinManager::SetupBowlingPins(const XMFLOAT3& headPinPos)
 {
     m_pins.clear();

@@ -68,6 +68,9 @@ static AABB g_GoalAABB;
 static bool g_IsGoal = false;
 BowlingBall g_BowlingBall;
 static int g_PrevDownPinCount = 0;
+static float g_PinSettleTimer = 0.0f;
+static constexpr float PIN_SETTLE_TIME = 1.0f; // 1秒待つ
+static bool g_WaitingPinSettle = false;
 
 
 PinManager g_Pinmanager;
@@ -166,38 +169,42 @@ void Game_Update(double elapsed_time)
 		Shot_ResetPower();
 		g_BallInPlay = true;
 	}
-
 	if (g_BallInPlay && g_BowlingBall.IsStopped())
 	{
-		g_BowlingBall.Reset(BALL_START_POS);
 		g_BallInPlay = false;
+		g_WaitingPinSettle = true;
+		g_PinSettleTimer = 0.0f;
+	}
+	if (g_WaitingPinSettle)
+	{
+		g_PinSettleTimer += elapsed_time;
 
-		g_ShotCount++;
-
-		int totalDown = g_Pinmanager.GetDownPinCount();
-		int fallenPins = totalDown - g_PrevDownPinCount;
-		g_PrevDownPinCount = totalDown;
-
-		// ★ ストライク判定（1投目で10本）
-		bool isStrike = (fallenPins == 10 && g_ShotCount == 1);
-
-		Score_AddThrow(fallenPins);
-
-		if (isStrike)
+		if (g_PinSettleTimer >= PIN_SETTLE_TIME)
 		{
-			// ストライク → 即フレーム終了
-			g_Pinmanager.ResetPins();
-			g_PrevDownPinCount = 0;
-			g_ShotCount = 0;
-		}
-		else if (g_ShotCount >= MAX_SHOT)
-		{
-			// 通常2投終了
-			g_Pinmanager.ResetPins();
-			g_PrevDownPinCount = 0;
-			g_ShotCount = 0;
+			g_WaitingPinSettle = false;
+
+			g_BowlingBall.Reset(BALL_START_POS);
+
+			g_ShotCount++;
+			int remaining = g_Pinmanager.GetRemainingPinCount();
+			int totalFallen = 10 - remaining;
+
+			int fallenPins = totalFallen - g_PrevDownPinCount;
+			g_PrevDownPinCount = totalFallen;
+
+			bool isStrike = (fallenPins == 10 && g_ShotCount == 1);
+			//hal::dout << "Fallen Pins: " << fallenPins << " Total Down: " << totalDown << " Shot Count: " << g_ShotCount << "\n";
+			Score_AddThrow(fallenPins);
+
+			if (isStrike || g_ShotCount >= MAX_SHOT)
+			{
+				g_Pinmanager.ResetPins();
+				g_PrevDownPinCount = 0;
+				g_ShotCount = 0;
+			}
 		}
 	}
+
 
 
 
