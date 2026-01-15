@@ -10,6 +10,9 @@ DirectionCamera::DirectionCamera(
     const DirectX::XMFLOAT3& target)
     :m_Target(target),m_Current_Target(target)
 {
+    m_InitPosition = position;
+    m_InitFront = m_Front;
+    m_InitUp = m_up;
 
     // 初期 Front ベクトル（カメラの正面方向）
     XMVECTOR xtarget = XMLoadFloat3(&target);
@@ -57,6 +60,29 @@ void DirectionCamera::Update(double elapsed_time)
     // なめらか補間（ここが肝）
     float zoomLerp = 0.4f * static_cast<float>(elapsed_time);
     xposition = XMVectorLerp(xposition, targetEye, zoomLerp);
+    // ---- Yイージング処理 ----
+    if (m_YEaseActive)
+    {
+        m_YEaseTime += static_cast<float>(elapsed_time);
+        float t = m_YEaseTime / m_YEaseDuration;
+
+        if (t >= 1.0f)
+        {
+            t = 1.0f;
+            m_YEaseActive = false;
+        }
+
+        float curve = EaseInOut(t);
+
+        // 下がって → 上がる
+        float yOffset = (t < 0.5f)
+            ? curve * m_YDown
+            : curve * m_YUp;
+
+        float newY = m_YStart + yOffset;
+
+        xposition = XMVectorSetY(xposition, newY);
+    }
 
     // 常にターゲットを見る
    // xfront = XMVector3Normalize(xtarget - xposition);
@@ -138,9 +164,27 @@ void DirectionCamera::SetMatrix()
 
 void DirectionCamera::ResetCamera()
 {
+    SetPosition(m_InitPosition);
+    m_Front = m_InitFront;
+    m_up = m_InitUp;
+
+    m_YEaseActive = false;
+    m_YEaseTime = 0.0f;
 
     m_Target = m_Current_Target;
-
 }
 
+
+void DirectionCamera::StartYEase()
+{
+    m_YEaseActive = true;
+    m_YEaseTime = 0.0f;
+    m_YStart = GetPosition().y;
+}
+
+float EaseInOut(float t)
+{
+    // 0→1→0 の山形カーブ
+    return sinf(t * XM_PI);
+}
 

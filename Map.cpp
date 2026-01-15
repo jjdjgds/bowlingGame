@@ -68,14 +68,14 @@ void Map_Initialize()
         // 左ガーター
         g_Blocks.push_back({
             { GUTTER_CENTER_LEFT + xOffset, 0.9f, -10.0f },
-            { GUTTER_WIDTH, 1.0f, 100.0f },
+            { GUTTER_WIDTH, 1.0f, 160.0f },
             Block::Gutter
             });
 
         // 右ガーター
         g_Blocks.push_back({
             { GUTTER_CENTER_RIGHT + xOffset, 0.9f, -10.0f },
-            { GUTTER_WIDTH, 1.0f, 100.0f },
+            { GUTTER_WIDTH, 1.0f, 160.0f },
             Block::Gutter
             });
 
@@ -104,7 +104,7 @@ void Map_Initialize()
         // ===== ガーター外側の進入禁止壁 =====
         constexpr float wallHeight = 2.0f;
         constexpr float wallThickness = 0.5f;
-        constexpr float wallLength = 100.0f;
+        constexpr float wallLength = 160.0f;
         constexpr float zPos = -10.0f;
 
         constexpr float WALL2_OFFSET = GUTTER_WIDTH * 0.5f + wallThickness * 0.5f;

@@ -70,7 +70,7 @@ static constexpr int MAX_SHOT = 2;
 
 
 
-static const XMFLOAT3 BALL_START_POS = { 5,5,-60 };
+static const XMFLOAT3 BALL_START_POS = { 5,5,-65 };
 static const XMFLOAT3 Point_Of_Fixation ={ 5.f, 5.0f, 5.0f };
 
 static bool g_BallInPlay = false;
@@ -198,7 +198,9 @@ void Game_Update(double elapsed_time)
 		g_BowlingBall.AddForce(Shot_GetShotVelocity());
 		Shot_ResetPower();
 		g_BallInPlay = true;
+		//g_pDirectionCamera->StartYEase();
 	}
+
 	g_pDebugCamera->Update(elapsed_time);
 
 	if (g_BallInPlay)
