@@ -151,7 +151,9 @@ void Shot_Update(double et)
                     5.0f,
                     MAX_POWER
                 );
+
                 g_Power *= 1.5f;
+                if (g_Power <= 15)g_Power = 30;
                 g_IsCharging = false;
                 g_State = ShotState::Aim;
             }
