@@ -10,8 +10,16 @@ enum class ThrowMark
     Strike
 };
 
+struct Score
+{
+public:
+    int Totalscore;
+    int  GetTotalScore() { return Totalscore; }
+    void SetTotalScore(int a) { Totalscore = a; }
+};
 
-
+Score *GetScore();
+void ScoreSet(int);
 void Score_AddThrow(int pins);
 void Score_Recalculate();
 void ScoreBoard_Draw();

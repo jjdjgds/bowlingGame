@@ -6,6 +6,8 @@
 #include "texture.h"
 #include "direct3d.h"
 
+Score score;
+
 static int g_ScoreBoardTexId = -1;
 static int g_NumberTexId = -1;
 static constexpr int FRAME_COUNT = 4;
@@ -66,6 +68,7 @@ void ScoreBoard_Initialize()
     }
     g_CurrentFrame = 0;
     g_CurrentThrow = 0;
+    score.SetTotalScore(0);
 }
 
 float GetSymbolSrcY(int symbol)
@@ -128,6 +131,16 @@ void DrawSymbol(
     );
 }
 
+
+Score *GetScore()
+{
+    return &score;
+}
+
+void ScoreSet(int a)
+{
+    score.Totalscore += a;
+}
 
 // Score_AddThrow の堅牢化:
 // - pins を 0..10 にクランプ
@@ -196,6 +209,7 @@ void Score_AddThrow(int pins)
         g_CurrentFrame++;
         g_CurrentThrow = 0;
     }
+    ScoreSet(pins);
 }
 
 void Score_Recalculate()
