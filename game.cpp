@@ -34,6 +34,7 @@
 
 #include "debug_ostream.h" // 追加：ログ出力用
 #include "trail_explosion.h"
+#include "DirectionCamera.h"
 
 using namespace DirectX;
 
@@ -52,6 +53,7 @@ static AnimPatternPlayer* g_pAnimPlayer{ nullptr };
 //deleteすれば消える
 static DebugCamera* g_pDebugCamera{}; 
 static FixedCamera* g_FixedCameras[3];
+static DirectionCamera* g_pDirectionCamera{};
 static int g_FixedCameraIndex{0};
 
 
@@ -69,7 +71,7 @@ static constexpr int MAX_SHOT = 2;
 
 
 static const XMFLOAT3 BALL_START_POS = { 5,5,-60 };
-
+static const XMFLOAT3 Point_Of_Fixation ={ 5.f, 5.0f, 5.0f };
 
 static bool g_BallInPlay = false;
 
@@ -98,6 +100,9 @@ void Game_Initialize()
 	a.z -= 7;
 	g_pDebugCamera = new DebugCamera({ a }, { 0.0f,0.0f,0.0f });
 	g_pShotCamera = new ShotCamera({ 0.0f,0.0f,50.0f }, {2.0f,1.0f,2.0f},2.0f);
+	g_pDirectionCamera = new DirectionCamera({ a }, { Point_Of_Fixation });
+
+
 	g_FixedCameras[0] = new FixedCamera({ -5.0f, 10.0f, 10.0f }, AABB::Make({ 1.0f,5.00f,1.0f }, {5.0f,5.0f,5.0f}));
 	g_FixedCameras[1] = new FixedCamera({5.0f, 10.0f, 10.0f}, AABB::Make({ 6.0f,6.0f,6.0f }, { 20.0f,10.0f,20.0f }));
 	g_BowlingBall.Init(BALL_START_POS);
@@ -136,7 +141,8 @@ static double g_time{ 0.0 };
 void Game_Update(double elapsed_time)
 {
 	g_time += elapsed_time;
-	g_pDebugCamera->Update(elapsed_time);
+
+
 	g_BowlingBall.Update(elapsed_time);
 	Shot_SetPosition(g_BowlingBall.GetPosition()); // ★追加
 
@@ -193,6 +199,18 @@ void Game_Update(double elapsed_time)
 		Shot_ResetPower();
 		g_BallInPlay = true;
 	}
+	g_pDebugCamera->Update(elapsed_time);
+
+	if (g_BallInPlay)
+	{
+		g_pDirectionCamera->Update(elapsed_time);
+	}
+	else
+	{
+		g_pDirectionCamera->ResetCamera();
+	}
+
+
 	if (g_BallInPlay && g_BowlingBall.IsStopped())
 	{
 		g_BallInPlay = false;
@@ -290,7 +308,15 @@ void Game_Draw()
 
 	Direct3D_SetDepthTest(true);
 	//g_pShotCamera->SetMatrix();
-	g_pDebugCamera->SetMatrix();   // ★これが最重要
+	if (g_BallInPlay)
+	{
+		g_pDirectionCamera->SetMatrix();
+	}
+	else
+	{
+		g_pDebugCamera->SetMatrix();
+	}
+
 	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
 	//Direct3D_SetDepthWriteDisable();
 	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f, 2.0f }, { 0.7,1 }, {0.5,0.5});
