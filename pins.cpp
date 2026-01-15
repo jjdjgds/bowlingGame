@@ -30,9 +30,9 @@ void Pins::Initialize(const XMFLOAT3& pos)
     m_isHit = false;
     m_aliveTime = 0.0f;
     m_lifeTimer = 0.0f;
-
+    
     m_model = ModelLoad("rom\\Model\\Pin.fbx", 0.9);
-
+        //m_model = ModelLoad("rom\\Model\\bowlingBall1.fbx", 0.9);
     m_baseHalf = { 1.5f, 3.f, 1.5f };
 
     m_Aabb = AABB::Make(m_position, m_baseHalf);

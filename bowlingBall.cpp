@@ -21,9 +21,9 @@ void BowlingBall::Init(const XMFLOAT3& pos)
 {
     m_position = pos;
     m_velocity = { 0.0f, 0.0f ,0.0f};
-    g_pBall = ModelLoad("rom\\Model\\ball.fbx", 0.1);
+    g_pBall =  ModelLoad("rom\\Model\\bowlingBall1.fbx", 0.9);
     m_Aabb = g_pBall->Aabb;
-    m_Aabb = AABB::Make(GetPosition(), {0.3f,0.3f,0.3f});
+    m_Aabb = AABB::Make(GetPosition(), {2.f,2.f,2.f});
     g_Texid = Texture_Load(L"rom\\Texture\\gra_effect_lightA.png");
     AuraEffect_Initialize();
     ParticleEffect_Initialize();
@@ -172,7 +172,25 @@ void BowlingBall::Update(float deltaTime)
     }
 
 
-   
+    // ===== 回転処理 =====
+    if (m_onGround)
+    {
+        // 水平方向速度（レーン方向）
+        float speedZ = m_velocity.z;
+
+        if (fabs(speedZ) > 0.001f)
+        {
+            // 移動距離
+            float moveDist = speedZ * deltaTime;
+
+            // 回転角 = 距離 / 半径
+            float rot = moveDist / m_radius;
+
+            // Z+に進むならX軸マイナス回転（右手系）
+            m_rotation.x -= rot;
+        }
+    }
+
     Shot_SetPosition(m_position);
 
 }
@@ -211,21 +229,24 @@ void BowlingBall::Draw()
 {
     Shader3d_Begin();
     Direct3D_SetDepthWriteEnable();
-    XMMATRIX mtxWorld = XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+
+    XMMATRIX mtxRot =
+        XMMatrixRotationRollPitchYaw(
+            m_rotation.x,
+            m_rotation.y,
+            m_rotation.z);
+
+    XMMATRIX mtxTrans =
+        XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+
+    XMMATRIX mtxWorld = mtxRot * mtxTrans;
     m_mtxWorld = mtxWorld;
 
-    // モデル描画(通常の深度テスト)
     ModelDraw(g_pBall, mtxWorld);
 
-    // ★パーティクルエフェクト描画前に深度書き込みを無効化
-    //Direct3D_SetDepthWriteDisable();
-  
     ParticleEffectParams fire = ParticleEffect_PresetFire();
     ParticleEffect_Draw(fire, mtxWorld);
-  
-    // ★深度書き込みを元に戻す
-   // Direct3D_SetDepthWriteEnable();
 
-    // デバッグ描画
-    DebugDraw_AddAABB(m_Aabb, { 1.0f, 0.0f, 0.0f, 1.0f });
+    DebugDraw_AddAABB(m_Aabb, { 1,0,0,1 });
 }
+

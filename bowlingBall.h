@@ -49,8 +49,14 @@ private:
     bool  m_onGround = false;
     float m_pawer = 50.0f;
      AABB m_Aabb{};
-    float m_radius = 0.3f;   // レーン基準の半径
+    //float m_radius = 0.3f;   // レーン基準の半径
     float m_mass = 6.8f;    // ボーリング球っぽい重さ(kg)
     DirectX::XMMATRIX m_mtxWorld{};
     bool m_gatterFlg = false;
+
+    // 回転用
+    DirectX::XMFLOAT3 m_rotation{};   // XYZ回転角（ラジアン）
+    float    m_radius = 1.0f; // ボール半径（モデルに合わせて調整）
+
+
 };
