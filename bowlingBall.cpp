@@ -165,7 +165,8 @@ void BowlingBall::Update(float deltaTime)
    // ===== 摩擦・レーン制御 =====
     if (m_onGround)
     {
-        m_velocity.x *= 0.98f;
+        // 変更後（おすすめ）
+        m_velocity.x *= 0.995f;
 
         if (m_gatterFlg)
             m_velocity.z *= 0.98f;

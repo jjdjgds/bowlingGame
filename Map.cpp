@@ -62,7 +62,7 @@ void Map_Initialize()
         // è∞
         g_Blocks.push_back({
             { FLOOR_CENTER_X + xOffset, 1.0f, 10.0f },
-            { FLOOR_WIDTH, 1.0f, 140.0f },
+            { FLOOR_WIDTH, 1.0f, 160.0f },
                Block::Wood
             });
         // ç∂ÉKÅ[É^Å[

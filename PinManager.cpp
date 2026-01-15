@@ -173,7 +173,7 @@ void PinManager::SetupBowlingPins(const XMFLOAT3& headPinPos)
 void PinManager::ResetPins()
 {
     // ヘッドピン基準位置
-    SetupBowlingPins({ 4.f, 5.0f, 10.0f });
+    SetupBowlingPins({ 5.f, 5.0f, 10.0f });
 }
 
 int PinManager::GetDownPinCount() const
@@ -191,6 +191,6 @@ int PinManager::GetDownPinCount() const
 void PinManager::DestroyAndRecreatePins()
 {
     m_pins.clear();
-    SetupBowlingPins({ 4.f, 5.0f, 10.0f });
+    SetupBowlingPins({ 5.f, 5.0f, 10.0f });
 }
 

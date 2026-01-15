@@ -67,7 +67,7 @@ static constexpr int MAX_SHOT = 2;
 
 
 
-static const XMFLOAT3 BALL_START_POS = { 4,5,-38 };
+static const XMFLOAT3 BALL_START_POS = { 5,5,-60 };
 
 
 static bool g_BallInPlay = false;
@@ -93,7 +93,7 @@ void Game_Initialize()
 {
 	g_GoalAABB = AABB::Make({ float(1.0f), 0.9f, float(1.0f) }, { 1,1,1 });
 	DebugDraw_Initialize();
-	g_pDebugCamera = new DebugCamera({ 0.0f,1.0f,-5.0f }, { 0.0f,0.0f,0.0f });
+	g_pDebugCamera = new DebugCamera({ BALL_START_POS }, { 0.0f,0.0f,0.0f });
 	g_pShotCamera = new ShotCamera({ 0.0f,0.0f,50.0f }, {2.0f,1.0f,2.0f},2.0f);
 	g_FixedCameras[0] = new FixedCamera({ -5.0f, 10.0f, 10.0f }, AABB::Make({ 1.0f,5.00f,1.0f }, {5.0f,5.0f,5.0f}));
 	g_FixedCameras[1] = new FixedCamera({5.0f, 10.0f, 10.0f}, AABB::Make({ 6.0f,6.0f,6.0f }, { 20.0f,10.0f,20.0f }));
