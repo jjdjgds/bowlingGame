@@ -154,6 +154,8 @@ void Map_Initialize()
             block.SetAABB(AABB::Make(block.GetPosition(), { 1.0, 1.0, 1.0 }));
             break;
 
+
+
         case Block::Wood:
             block.SetAABB(AABB::Make(block.GetPosition(), block.GetScale()));
             break;
@@ -165,14 +167,23 @@ void Map_Initialize()
             block.SetAABB(AABB::Make(block.GetPosition(), blockScale));
         }
             break;
-        case Block::Gutter:
+      /*  case Block::Gutter:
+        {
+            XMFLOAT3 blockScale = block.GetScale();
+            blockScale.y += 5;
+            block.SetAABB(AABB::Make(block.GetPosition(), blockScale));
+        }
+            break;*/
+
+
+        case Block::WALL2:
+
         {
             XMFLOAT3 blockScale = block.GetScale();
             blockScale.y += 5;
             block.SetAABB(AABB::Make(block.GetPosition(), blockScale));
         }
             break;
-
         case Block::GOAL:
            // block.SetAABB(AABB::Make(block.GetPosition(), { 1.0, 1.0, 1.0 }));
             break;
