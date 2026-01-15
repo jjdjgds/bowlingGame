@@ -48,6 +48,12 @@ void Billboard_Draw(
 	const DirectX::XMFLOAT2& pivot
 );
 
+void Billboard_Draw(
+	int texid,
+	const DirectX::XMMATRIX& mtxWorld,
+	const DirectX::XMFLOAT2& scale,
+	const DirectX::XMFLOAT4& color
+);
 
 
 

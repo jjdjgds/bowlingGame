@@ -142,16 +142,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="AuraEffect.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="BillBord.cpp" />
+    <ClCompile Include="bowlingBall.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="camera_fixed.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="cube.cpp" />
     <ClCompile Include="debug.cpp" />
+    <ClCompile Include="DebugDraw.cpp" />
     <ClCompile Include="debug_ostream.cpp" />
     <ClCompile Include="debug_text.cpp" />
     <ClCompile Include="direct3d.cpp" />
+    <ClCompile Include="DirectionCamera.cpp" />
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gameeffect.cpp" />
@@ -165,10 +169,15 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="mouse.cpp" />
+    <ClCompile Include="Mouselogger.cpp" />
+    <ClCompile Include="ParticleEffect.cpp" />
+    <ClCompile Include="PinManager.cpp" />
+    <ClCompile Include="pins.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="polygon.cpp" />
     <ClCompile Include="result.cpp" />
     <ClCompile Include="scene.cpp" />
+    <ClCompile Include="ScoreBoard.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="shader3d.cpp" />
     <ClCompile Include="ShaderBillBoard.cpp" />
@@ -181,20 +190,26 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="titile.cpp" />
     <ClCompile Include="trail.cpp" />
+    <ClCompile Include="trail_explosion.cpp" />
+    <ClCompile Include="UI.cpp" />
     <ClCompile Include="WICTextureLoader11.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio.h" />
+    <ClInclude Include="AuraEffect.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="BillBord.h" />
+    <ClInclude Include="bowlingBall.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="camera_fixed.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="DebugDraw.h" />
     <ClInclude Include="debug_ostream.h" />
     <ClInclude Include="debug_text.h" />
     <ClInclude Include="direct3d.h" />
+    <ClInclude Include="DirectionCamera.h" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="fade.h" />
     <ClInclude Include="game.h" />
@@ -208,11 +223,16 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="mouse.h" />
+    <ClInclude Include="Mouselogger.h" />
+    <ClInclude Include="ParticleEffect.h" />
+    <ClInclude Include="PinManager.h" />
+    <ClInclude Include="pins.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="polygon.h" />
     <ClInclude Include="game_score.h" />
     <ClInclude Include="result.h" />
     <ClInclude Include="scene.h" />
+    <ClInclude Include="ScoreBoard.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="shader3d.h" />
     <ClInclude Include="ShaderBillBoard.h" />
@@ -225,6 +245,8 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="titile.h" />
     <ClInclude Include="trail.h" />
+    <ClInclude Include="trail_explosion.h" />
+    <ClInclude Include="UI.h" />
     <ClInclude Include="WICTextureLoader11.h" />
   </ItemGroup>
   <ItemGroup>

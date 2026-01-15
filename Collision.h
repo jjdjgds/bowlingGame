@@ -86,6 +86,7 @@ public:
 	const DirectX::XMFLOAT3& GetMin() const { return m_Min; }
 	const DirectX::XMFLOAT3& GetMax() const { return m_Max; }
 	const DirectX::XMFLOAT3& GetCenter() const { return m_Center; }
+	void SetCenter(const DirectX::XMFLOAT3& center) { m_Center = center; }
 	const DirectX::XMFLOAT3& GetHalfSize() const { return m_Half; }
 
 	bool IsOverlap(const AABB&) const override;

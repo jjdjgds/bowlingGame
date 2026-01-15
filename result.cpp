@@ -25,6 +25,7 @@
 #include "scene.h"
 #include "algorithm"
 #include "player.h"
+#include "ScoreBoard.h"
 
 
 static int g_WaitTime = 1.0;
@@ -130,11 +131,15 @@ void Result_Update(double elapsed_time)
 void Result_Draw()
 {
 	Player* p = GetPlayer();
+	Score* s = GetScore();
+
+
+
 	// --- 背景 ---
 	Sprite_Draw(g_ResultTex, 0, 0, 1600, 900);
 
 	// --- スコア表示 ---
-	int temp = p->GetPlayerScore();
+	int temp = s->GetTotalScore();
 	int spacing = 64;   // 数字の横間隔
 	int digitW = 32;    // 数字の幅
 	int digitH = 40;    // 数字の高さ

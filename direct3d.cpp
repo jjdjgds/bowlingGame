@@ -152,23 +152,34 @@ bool Direct3D_Initialize(HWND hWnd)
      Direct3D_SetAlphaBlend(BLEND_TRANSPARENT);
 
 
-	 // 深度ステンシルステートの設定（深度有効）
-	 D3D11_DEPTH_STENCIL_DESC dsd = {};
-	 dsd.DepthFunc = D3D11_COMPARISON_LESS; // 手前が優先
-	 dsd.StencilEnable = FALSE; // ステンシル不要
-	 dsd.DepthEnable = FALSE;    // 深度テストを有効
-	 dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // 深度書き込み有効
+	 // 共通設定
+	 D3D11_DEPTH_STENCIL_DESC dsd{};
+	 dsd.StencilEnable = FALSE;
+	 dsd.DepthFunc = D3D11_COMPARISON_LESS;
+
+	 // ----------------------------
+	 // 深度テスト無効
+	 // ----------------------------
+	 dsd.DepthEnable = FALSE;
+	 dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	 g_pDevice->CreateDepthStencilState(&dsd, &g_pDepthStencilStateDepthDisable);
 
+	 // ----------------------------
+	 // 深度テストON / 書き込みOFF
+	 // ----------------------------
+	 dsd.DepthEnable = TRUE;
+	 dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	 g_pDevice->CreateDepthStencilState(&dsd, &g_pDepthStencilStateDepthEnable);
 
-
-	 dsd.DepthEnable = TRUE;    // 深度テストを有効
-	 dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL; // 深度書き込み有効
-	 g_pDeviceContext->OMSetDepthStencilState(g_pDepthStencilStateDepthDisable, 0);
-	
-
-	 dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // 深度書き込み
+	 // ----------------------------
+	 // 深度テストON / 書き込みON
+	 // ----------------------------
+	 dsd.DepthEnable = TRUE;
+	 dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	 g_pDevice->CreateDepthStencilState(&dsd, &g_pDepthStencilStateDepthWriteEnable);
+
+	 // 初期状態
+	 g_pDeviceContext->OMSetDepthStencilState(g_pDepthStencilStateDepthEnable, 0);
 
 	 Direct3D_SetDepthTest(true);
 	return true;
@@ -287,8 +298,14 @@ void Direct3D_SetDepthTest(bool bEnable)
 
 void Direct3D_SetDepthWriteDisable()
 {
-	//g_pDepthStencilStateDepthEnable;
-	g_pDeviceContext->OMSetDepthStencilState(g_pDepthStencilStateDepthWriteEnable, NULL);
+	g_pDeviceContext->OMSetDepthStencilState(
+		g_pDepthStencilStateDepthEnable, 0);
+}
+
+void Direct3D_SetDepthWriteEnable()
+{
+	g_pDeviceContext->OMSetDepthStencilState(
+		g_pDepthStencilStateDepthWriteEnable, 0);
 }
 
 //void SetViewport(int n)

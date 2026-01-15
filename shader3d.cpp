@@ -24,6 +24,8 @@ static ID3D11Buffer* g_pVSConstantBuffer0 = nullptr;
 
 
 static ID3D11Buffer* g_pPSConstantBuffer = nullptr;
+
+static ID3D11Buffer* g_pPSConstantBuffer1 = nullptr;
 static ID3D11Buffer* g_pPSConstantBuffer2 = nullptr;
 
 static ID3D11PixelShader* g_pPixelShader = nullptr;
@@ -32,6 +34,11 @@ static ID3D11SamplerState* g_pSamplerState = nullptr; // ƒTƒ“ƒvƒ‰[ƒXƒe[ƒg‚¢‚­‚
 static ID3D11Device* g_pDevice = nullptr;
 static ID3D11DeviceContext* g_pContext = nullptr;
 
+struct PS_CB1
+{
+	DirectX::XMFLOAT4 diffuse_color;
+	DirectX::XMFLOAT4 diffuse_world_vector;
+};
 
 bool Shader3d_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -139,16 +146,21 @@ bool Shader3d_Initialize(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[—p’è”ƒoƒbƒtƒ@‚Ìì¬
 	
+	buffer_desc.ByteWidth = sizeof(PS_CB1); // ƒoƒbƒtƒ@‚ÌƒTƒCƒY
+	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pPSConstantBuffer1);
+
 	buffer_desc.ByteWidth = sizeof(XMFLOAT4); // ƒoƒbƒtƒ@‚ÌƒTƒCƒY
 
 	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pPSConstantBuffer);
+	
 	g_pDevice->CreateBuffer(&buffer_desc, nullptr, &g_pPSConstantBuffer2);
 
 
 	// ƒTƒ“ƒvƒ‰[ƒXƒe[ƒgÝ’è
 	D3D11_SAMPLER_DESC sampler_desc{};
 	//sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
-	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	//sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
 	//sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -175,6 +187,8 @@ void Shader3d_Finalize()
 {
 	SAFE_RELEASE(g_pSamplerState);
 	SAFE_RELEASE(g_pPSConstantBuffer);
+	SAFE_RELEASE(g_pPSConstantBuffer1);
+	SAFE_RELEASE(g_pPSConstantBuffer2);
 	SAFE_RELEASE(g_pPixelShader);
 	SAFE_RELEASE(g_pVSConstantBuffer0);
 
@@ -216,7 +230,11 @@ void Shader3d_Begin()
 
 	// ’è”ƒoƒbƒtƒ@‚ð•`‰æƒpƒCƒvƒ‰ƒCƒ“‚ÉÝ’è
 	g_pContext->VSSetConstantBuffers(0, 1, &g_pVSConstantBuffer0);
-	
+	// d—vFƒsƒNƒZƒ‹ƒVƒF[ƒ_[ b0 ‚ðŠmŽÀ‚ÉƒoƒCƒ“ƒhiƒAƒ“ƒrƒGƒ“ƒgj
+	g_pContext->PSSetConstantBuffers(0, 1, &g_pPSConstantBuffer);
+	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[ b1iƒfƒBƒtƒ…[ƒYj‚Æ b2iƒ}ƒeƒŠƒAƒ‹j‚ðƒoƒCƒ“ƒh
+	g_pContext->PSSetConstantBuffers(1, 1, &g_pPSConstantBuffer1);
+
 	g_pContext->PSSetConstantBuffers(2, 1, &g_pPSConstantBuffer2);
 
 
@@ -234,4 +252,14 @@ void Shader3d_SetMaterialDiffuse(const DirectX::XMFLOAT4& Color)
 
 
 
+}
+
+// ’Ç‰ÁFƒfƒBƒtƒ…[ƒYŒõiF + ƒ[ƒ‹ƒh•ûŒüj‚ðƒsƒNƒZƒ‹ƒVƒF[ƒ_—p’è”ƒoƒbƒtƒ@(b1)‚Ö‘‚«ž‚Þ
+void Shader3d_SetLightDiffuse(const DirectX::XMFLOAT4& diffuseColor, const DirectX::XMFLOAT4& worldDirection)
+{
+	PS_CB1 cb{};
+	cb.diffuse_color = diffuseColor;
+	cb.diffuse_world_vector = worldDirection;
+	// g_pPSConstantBuffer1 ‚Í b1 ‚ÉŠ„‚è“–‚ÄÏ‚Ý
+	g_pContext->UpdateSubresource(g_pPSConstantBuffer1, 0, nullptr, &cb, 0, 0);
 }
