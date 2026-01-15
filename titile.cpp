@@ -50,9 +50,7 @@ void Title_Initialize()
 
 	g_TitleTex = Texture_Load(L"rom\\title.png"); // タイトルテクスチャの読み込み
 	g_TexPushAnyKeyId = Texture_Load(L"rom\\Push_Enter_Key.png"); // キーを押してくださいテクスチャの読み込み
-	setumeiTexId[0]= Texture_Load(L"rom\\setumei1.png");
-	setumeiTexId[1] = Texture_Load(L"rom\\setumei2.png");
-	setumeiTexId[2] = Texture_Load(L"rom\\setumei3.png");
+	
 	//setumeiTexId[3] = Texture_Load(L"rom\\Push_Enter_Key.png");
 
 	PushCount = 0;
@@ -80,30 +78,13 @@ void Title_Update(double elapsed_time)
 	case TITLE_STATE_KEYINPUT_WAIT:
 
 		if (KeyLogger_IsTrigger(KK_ENTER) && PushCount == 0) {
-			//g_TitleState = TITLE_STATE_KEYINPUT_ACTION;
-			g_keyInputWaitTime = g_AccumulatedTime;
-			PushCount++;
-			//サウンド
-		}
-		else if (KeyLogger_IsTrigger(KK_ENTER) && PushCount == 1)
-		{
-			g_keyInputWaitTime = g_AccumulatedTime;
-				PushCount++;
-
-		}
-		else if (KeyLogger_IsTrigger(KK_ENTER) && PushCount == 2)
-		{
-			g_keyInputWaitTime = g_AccumulatedTime;
-			PushCount++;
-
-		}
-		else if (KeyLogger_IsTrigger(KK_ENTER) && PushCount == 3)
-		{
 			g_TitleState = TITLE_STATE_KEYINPUT_ACTION;
 			g_keyInputWaitTime = g_AccumulatedTime;
 			//PushCount++;
-
+			//サウンド
 		}
+		
+		
 		
 		
 		break;
