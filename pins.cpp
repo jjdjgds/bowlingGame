@@ -14,7 +14,7 @@ Pins::Pins()
     , m_velocity{ 0,0,0 }
     , m_angularVelocity{ 0,0,0 }
     , m_isDown(false)
-    , m_mass(1.0f)
+    , m_mass(9.8f)
 {
 }
 
@@ -171,9 +171,9 @@ void Pins::Hit(const XMFLOAT3& impulse, const XMFLOAT3& hitPoint)
     XMFLOAT3 t;
     XMStoreFloat3(&t, torque);
 
-    m_angularVelocity.x += t.x * 0.05f;
-    m_angularVelocity.y += t.y * 0.05f;
-    m_angularVelocity.z += t.z * 0.05f;
+    m_angularVelocity.x += t.x * 3.f;
+    m_angularVelocity.y += t.y * 3.f;
+    m_angularVelocity.z += t.z * 3.f;
 }
 
 bool Pins::IsDown() const
