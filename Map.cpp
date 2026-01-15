@@ -107,32 +107,7 @@ void Map_Initialize()
             });
     }
 
-    //// ===== Audience 自動生成（左右）=====
-    //constexpr float audienceScale = 10.0f;
-    //constexpr float startZ = -20.0f;
-    //constexpr float endZ = 32.0f;   // Wall くらいまで
-    //constexpr float interval = 10.0f;
-
-    //constexpr float leftX = -6.0f;
-    //constexpr float rightX =16.0f;   // 反対側（Wall中心3 + 幅15/2 + 余白）
-
-    //for (float z = startZ; z <= endZ; z += interval)
-    //{
-    //    // 左側
-    //    g_Blocks.push_back({
-    //        { leftX, 5.0f, z },
-    //        { audienceScale, audienceScale, audienceScale },
-    //        Block::Audience
-    //        });
-
-    //    // 右側
-    //    g_Blocks.push_back({
-    //        { rightX, 5.0f, z },
-    //        { audienceScale, audienceScale, audienceScale },
-    //        Block::Audience
-    //        });
-    //}
-
+    
 
     g_MapTexId[0] = Texture_Load(L"rom\\Texture\\kankyaku.jpg");
     g_MapTexId[1] = Texture_Load(L"rom\\Texture\\jimen.jpg");
@@ -146,8 +121,8 @@ void Map_Initialize()
     g_MapModels[2] = ModelLoad("rom\\Model\\UFO.fbx");
     g_MapModels[3] = ModelLoad("rom\\Model\\Star.fbx",2);
     g_MapModels[4] = ModelLoad("rom\\Model\\StarCore.fbx", 1);
-    g_MapModels[5] = ModelLoad("rom\\Model\\a.fbx", 0.01);
-
+    //g_MapModels[5] = ModelLoad("rom\\Model\\Pin.fbx", 1);
+    g_Blocks.push_back({ {1,1,1}, { 10, 10, 10 }, Block::Normal});
 
     for (Block& block : g_Blocks) {
         switch (block.GetType())
@@ -227,7 +202,7 @@ void Block::Draw() const
     case Block::EMPTY:
         break;
     case Block::Normal:
-        Cube_Draw(mtxworld, g_MapTexId[0]);
+        //ModelDraw(g_MapModels[5], XMMatrixIdentity());
         break;
 
     case Block::WALL2:

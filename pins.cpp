@@ -31,7 +31,7 @@ void Pins::Initialize(const XMFLOAT3& pos)
     m_aliveTime = 0.0f;
     m_lifeTimer = 0.0f;
 
-    m_model = ModelLoad("rom\\Model\\Pins.fbx");
+    m_model = ModelLoad("rom\\Model\\Pin.fbx", 0.9);
 
     m_baseHalf = { 1.5f, 3.f, 1.5f };
 
@@ -146,8 +146,8 @@ void Pins::Draw()
             m_position.y + drawOffsetY,
             m_position.z
         );
-
-    Cube_Draw(mtxworld, 0);
+    ModelDraw(m_model, mtxworld);
+   // Cube_Draw(mtxworld, 0);
     DebugDraw_AddAABB(m_Aabb, { 1,1,0,1 });
 }
 
