@@ -38,31 +38,31 @@ void DebugCamera::Update(double elapsed_time)
     XMVECTOR xup = XMLoadFloat3(&m_up);
     XMVECTOR xposition = XMLoadFloat3(&GetPosition());
 
-    // --- 回転操作 ---
-    if (KeyLogger_IsPressed(KK_RIGHT))
-    {
-        // Y軸回転
-        XMMATRIX rot = XMMatrixRotationY(ROTSPEED);
-        xfront = XMVector3TransformNormal(xfront, rot);
-        xright = XMVector3TransformNormal(xright, rot);
-    }
-    if (KeyLogger_IsPressed(KK_LEFT))
-    {
-        XMMATRIX rot = XMMatrixRotationY(-ROTSPEED);
-        xfront = XMVector3TransformNormal(xfront, rot);
-        xright = XMVector3TransformNormal(xright, rot);
-    }
-    if (KeyLogger_IsPressed(KK_UP))
-    {
-        // ピッチ（上下回転）
-        XMMATRIX rot = XMMatrixRotationAxis(xright, -ROTSPEED);
-        xfront = XMVector3TransformNormal(xfront, rot);
-    }
-    if (KeyLogger_IsPressed(KK_DOWN))
-    {
-        XMMATRIX rot = XMMatrixRotationAxis(xright, ROTSPEED);
-        xfront = XMVector3TransformNormal(xfront, rot);
-    }
+    //// --- 回転操作 ---
+    //if (KeyLogger_IsPressed(KK_RIGHT))
+    //{
+    //    // Y軸回転
+    //    XMMATRIX rot = XMMatrixRotationY(ROTSPEED);
+    //    xfront = XMVector3TransformNormal(xfront, rot);
+    //    xright = XMVector3TransformNormal(xright, rot);
+    //}
+    //if (KeyLogger_IsPressed(KK_LEFT))
+    //{
+    //    XMMATRIX rot = XMMatrixRotationY(-ROTSPEED);
+    //    xfront = XMVector3TransformNormal(xfront, rot);
+    //    xright = XMVector3TransformNormal(xright, rot);
+    //}
+    //if (KeyLogger_IsPressed(KK_UP))
+    //{
+    //    // ピッチ（上下回転）
+    //    XMMATRIX rot = XMMatrixRotationAxis(xright, -ROTSPEED);
+    //    xfront = XMVector3TransformNormal(xfront, rot);
+    //}
+    //if (KeyLogger_IsPressed(KK_DOWN))
+    //{
+    //    XMMATRIX rot = XMMatrixRotationAxis(xright, ROTSPEED);
+    //    xfront = XMVector3TransformNormal(xfront, rot);
+    //}
 
     // upベクトルは常に固定
     xup = XMVectorSet(0, 1, 0, 0);
@@ -72,35 +72,35 @@ void DebugCamera::Update(double elapsed_time)
     xright = XMVector3Normalize(XMVector3Cross(xup, xfront));
     xup = XMVector3Normalize(XMVector3Cross(xfront, xright));
 
-    // --- 移動操作 ---
-    if (KeyLogger_IsPressed(KK_W))
-    {
-        xposition += XMVector3Normalize(XMVectorSetY(xfront, 0.0f)) * MOVESPEED;
-    }
-    if (KeyLogger_IsPressed(KK_S))
-    {
-        xposition -= XMVector3Normalize(XMVectorSetY(xfront, 0.0f)) * MOVESPEED;
-    }
-    if (KeyLogger_IsPressed(KK_A))
-    {
-        xposition -= xright * MOVESPEED;
-    }
-    if (KeyLogger_IsPressed(KK_D))
-    {
-        xposition += xright * MOVESPEED;
-    }
-    if (KeyLogger_IsPressed(KK_Q)) // 上昇
-    {
-        xposition += xup * MOVESPEED;
-    }
-    if (KeyLogger_IsPressed(KK_E)) // 下降
-    {
-        xposition -= xup * MOVESPEED;
-    }
+    //// --- 移動操作 ---
+    //if (KeyLogger_IsPressed(KK_W))
+    //{
+    //    xposition += XMVector3Normalize(XMVectorSetY(xfront, 0.0f)) * MOVESPEED;
+    //}
+    //if (KeyLogger_IsPressed(KK_S))
+    //{
+    //    xposition -= XMVector3Normalize(XMVectorSetY(xfront, 0.0f)) * MOVESPEED;
+    //}
+    //if (KeyLogger_IsPressed(KK_A))
+    //{
+    //    xposition -= xright * MOVESPEED;
+    //}
+    //if (KeyLogger_IsPressed(KK_D))
+    //{
+    //    xposition += xright * MOVESPEED;
+    //}
+    //if (KeyLogger_IsPressed(KK_Q)) // 上昇
+    //{
+    //    xposition += xup * MOVESPEED;
+    //}
+    //if (KeyLogger_IsPressed(KK_E)) // 下降
+    //{
+    //    xposition -= xup * MOVESPEED;
+    //}
 
-    // --- FOV変更 ---
-    if (KeyLogger_IsPressed(KK_X)) m_fov -= 0.05f;
-    if (KeyLogger_IsPressed(KK_Z)) m_fov += 0.05f;
+    //// --- FOV変更 ---
+    //if (KeyLogger_IsPressed(KK_X)) m_fov -= 0.05f;
+    //if (KeyLogger_IsPressed(KK_Z)) m_fov += 0.05f;
 
     // 値をメンバに戻す
     XMStoreFloat3(&GetPositionReference(), xposition);

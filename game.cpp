@@ -363,7 +363,7 @@ void Game_Draw()
 	//	{ 140.0f,200.0f }, { 140.0f,145.0f }); // world を Identity にするか、任意のワールド行列を渡す
 	//
 	Map_Draw();
-	DebugDraw_Draw();
+	//DebugDraw_Draw();
 	TrailExplosion_Draw();
 	//2D描画はここに
 	Direct3D_SetDepthTest(false);

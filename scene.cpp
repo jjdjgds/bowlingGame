@@ -18,7 +18,7 @@
 #include "game.h"
 #include "result.h"
 #include "GameOver.h"
-static Scene g_Scene = SCENE_GAME;//ここを変更すればすぐにゲームに行ける
+static Scene g_Scene = SCENE_TITLE;//ここを変更すればすぐにゲームに行ける
 static Scene g_SceneNext = g_Scene;
 
 typedef void(*FunctionVoid)(void);
