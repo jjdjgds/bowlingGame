@@ -14,11 +14,24 @@ constexpr int   LANE_COUNT = 5;     // レーン数
 
 constexpr int LEFT_LANES = 5;
 constexpr int RIGHT_LANES = 5;
-constexpr float LANE_WIDTH = 12.0f;
+constexpr float LANE_WIDTH = 15.0f;
 constexpr float BASE_X = 0.0f;
-constexpr float FLOOR_CENTER_X = 4.0f;
-constexpr float FLOOR_WIDTH = 8.0f;
+constexpr float LANE_EXPAND = 3.0f;          // ← 追加
+constexpr float FLOOR_WIDTH = 8.0f + LANE_EXPAND;
+constexpr float FLOOR_CENTER_X = 4.0f + LANE_EXPAND * 0.5f;
+constexpr float GUTTER_OFFSET_LEFT = -0.50f - LANE_EXPAND * 0.5f;
+constexpr float GUTTER_OFFSET_RIGHT = 8.50f + LANE_EXPAND * 0.5f;
+constexpr float FLOOR_HALF_WIDTH = FLOOR_WIDTH * 0.5f;
+// 床の左右端（世界座標基準）
+constexpr float FLOOR_LEFT_X = FLOOR_CENTER_X - FLOOR_HALF_WIDTH;
+constexpr float FLOOR_RIGHT_X = FLOOR_CENTER_X + FLOOR_HALF_WIDTH;
 
+// ガーター幅
+constexpr float GUTTER_WIDTH = 1.5f;
+
+// ガーター中心位置（床にぴったり接する）
+constexpr float GUTTER_CENTER_LEFT = FLOOR_LEFT_X - GUTTER_WIDTH * 0.5f;
+constexpr float GUTTER_CENTER_RIGHT = FLOOR_RIGHT_X + GUTTER_WIDTH * 0.5f;
 std::vector<Block> g_Blocks;
 
 
@@ -49,27 +62,29 @@ void Map_Initialize()
         // 床
         g_Blocks.push_back({
             { FLOOR_CENTER_X + xOffset, 1.0f, 10.0f },
-            { FLOOR_WIDTH, 1.0f, 100.0f },
+            { FLOOR_WIDTH, 1.0f, 140.0f },
                Block::Wood
             });
-
-        // ガーター
+        // 左ガーター
         g_Blocks.push_back({
-            { -0.50f + xOffset, 0.9f, -10.0f },
-            { 1.0f, 1.0f, 60.0f },
+            { GUTTER_CENTER_LEFT + xOffset, 0.9f, -10.0f },
+            { GUTTER_WIDTH, 1.0f, 100.0f },
             Block::Gutter
             });
 
+        // 右ガーター
         g_Blocks.push_back({
-            { 8.50f + xOffset, 0.9f, -10.0f },
-            { 1.0f, 1.0f, 60.0f },
+            { GUTTER_CENTER_RIGHT + xOffset, 0.9f, -10.0f },
+            { GUTTER_WIDTH, 1.0f, 100.0f },
             Block::Gutter
             });
+
+
 
         // 奥の壁
         g_Blocks.push_back({
             { FLOOR_CENTER_X + xOffset, 1.0f, 32.0f },
-            { FLOOR_WIDTH, 10.0f, 30.0f },
+            { FLOOR_WIDTH+3, 20.0f, 30.0f },
             Block::WALL
             });
 
@@ -89,22 +104,30 @@ void Map_Initialize()
         // ===== ガーター外側の進入禁止壁 =====
         constexpr float wallHeight = 2.0f;
         constexpr float wallThickness = 0.5f;
-        constexpr float wallLength = 60.0f;
+        constexpr float wallLength = 100.0f;
         constexpr float zPos = -10.0f;
 
-        // 左
+        constexpr float WALL2_OFFSET = GUTTER_WIDTH * 0.5f + wallThickness * 0.5f;
+
+        // 左 WALL2
         g_Blocks.push_back({
-            { (-0.50f - 1.0f) + xOffset, wallHeight * 0.5f, zPos },
+            { GUTTER_CENTER_LEFT - WALL2_OFFSET + xOffset,
+              wallHeight * 0.5f,
+              zPos },
             { wallThickness, wallHeight, wallLength },
             Block::WALL2
             });
 
-        // 右
+        // 右 WALL2
         g_Blocks.push_back({
-            { (8.50f + 1.0f) + xOffset, wallHeight * 0.5f, zPos },
+            { GUTTER_CENTER_RIGHT + WALL2_OFFSET + xOffset,
+              wallHeight * 0.5f,
+              zPos },
             { wallThickness, wallHeight, wallLength },
             Block::WALL2
             });
+
+
     }
 
     
@@ -121,7 +144,7 @@ void Map_Initialize()
     g_MapModels[2] = ModelLoad("rom\\Model\\UFO.fbx");
     g_MapModels[3] = ModelLoad("rom\\Model\\Star.fbx",2);
     g_MapModels[4] = ModelLoad("rom\\Model\\StarCore.fbx", 1);
-    //g_MapModels[5] = ModelLoad("rom\\Model\\Pin.fbx", 1);
+
     g_Blocks.push_back({ {1,1,1}, { 10, 10, 10 }, Block::Normal});
 
     for (Block& block : g_Blocks) {

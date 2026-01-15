@@ -7,6 +7,8 @@ static constexpr float GRAVITY = -9.8f;
 static constexpr float FLOOR_Y = 0.0f;
 // 追加: X/Z 移動で倒れたと判定する閾値（調整可）
 static constexpr float POSITION_MOVE_THRESHOLD = 0.15f;
+// 少しでも回転しているとみなす角速度（調整用）
+static constexpr float ANGULAR_VELOCITY_THRESHOLD = 0.3f;
 
 Pins::Pins()
     : m_position{ 0,0,0 }
@@ -87,19 +89,24 @@ void Pins::Update(float deltaTime)
         m_isDown = true;
     }
 
-    // 追加: 生成位置からの X/Z の変位が閾値を超えたら倒れたと判定
-    if (!m_isDown) {
-        float dx = fabsf(m_position.x - m_spawnPosition.x);
-        float dz = fabsf(m_position.z - m_spawnPosition.z);
-        if (dx > POSITION_MOVE_THRESHOLD || dz > POSITION_MOVE_THRESHOLD) {
+    if (!m_isDown)
+    {
+        float angSpeed =
+            fabsf(m_angularVelocity.x) +
+            fabsf(m_angularVelocity.y) +
+            fabsf(m_angularVelocity.z);
+
+        if (angSpeed > ANGULAR_VELOCITY_THRESHOLD)
+        {
             m_isDown = true;
         }
     }
 
+
     if (m_isDown)
     {
         m_aliveTime += deltaTime;
-        if (m_aliveTime > 3.0f)
+        if (m_aliveTime > 1.0f)
         {
             m_isDead = true;
         }
@@ -107,7 +114,7 @@ void Pins::Update(float deltaTime)
     if (m_isHit)
     {
         m_lifeTimer += deltaTime;
-        if (m_lifeTimer > 3.0f)
+        if (m_lifeTimer > 1.0f)
         {
             m_isDead = true;
         }
