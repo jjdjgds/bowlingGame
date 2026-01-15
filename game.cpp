@@ -36,6 +36,7 @@
 #include "trail_explosion.h"
 #include "DirectionCamera.h"
 #include "UI.h"
+#include "Audio.h"
 using namespace DirectX;
 
 
@@ -89,7 +90,6 @@ static int g_PrevDownPinsThisThrow = 0;
 // 追加: 投球時に残っていたピン数（Remove/削除を考慮した確実な差分算出に使用）
 static int g_PrevRemainingPinsThisThrow = 0;
 
-
 PinManager g_Pinmanager;
 float GameClamp(float v, float minV, float maxV);
 void Game_Initialize()
@@ -112,6 +112,7 @@ void Game_Initialize()
 	Gulid_Initialize(10,10,1);
 	Map_Initialize();
 	Light_Initialize();
+	
 	a.z += 20;
 	//a.z += 30;
 //	Ball_Initialize({3,5,2});
@@ -123,7 +124,8 @@ void Game_Initialize()
 	//df.fbx
 	//g_pPenis = ModelLoad("rom\\Model\\yajirusi.fbx",0.1);
 	g_texid = Texture_Load(L"rom\\Texture\\gra_effect_lightA.png");
-	
+
+
 	g_Pinmanager.Initialize();
 
 
@@ -227,6 +229,7 @@ void Game_Update(double elapsed_time)
 
 		if (g_PinSettleTimer >= PIN_SETTLE_TIME)
 		{
+
 			g_WaitingPinSettle = false;
 			g_ShotCount++;
 
@@ -238,25 +241,30 @@ void Game_Update(double elapsed_time)
 			if (fallenPins < 0) fallenPins = 0;
 			fallenPins = static_cast<int>(GameClamp((float)fallenPins, 0.0f, 10.0f));
 
-			// ★★★ ここから追加 ★★★
+			// 
 			bool isStrike = (fallenPins == 10 && g_ShotCount == 1);
 			bool isSpare = (fallenPins > 0 && remainingAfterRemove == 0 && g_ShotCount == 2);
 			bool isGutter = (fallenPins == 0);
+
+			
 
 			// UI通知を表示
 			if (isStrike)
 			{
 				UI::ShowNotification(UI::NotificationType::STRIKE);
+				//PlayAudio(g_StrikeSound,false);
 			}
 			else if (isSpare)
 			{
 				UI::ShowNotification(UI::NotificationType::SPARE);
+				//PlayAudio(g_HitSound,false);
 			}
 			else if (isGutter)
 			{
 				UI::ShowNotification(UI::NotificationType::GUTTER);
 			}
-			// ★★★ ここまで追加 ★★★
+			
+			// 
 
 			Score_AddThrow(fallenPins);
 			g_BowlingBall.Reset(BALL_START_POS);
@@ -394,6 +402,8 @@ void Game_Finalize()
 	Trail_Finalize();
 	TrailExplosion_Finalize();
 	UI::Finalize();
+	g_Pinmanager.Finalize();
+
 }
 
 

@@ -8,6 +8,7 @@ public:
     void Initialize();
     void Update(float dt, BowlingBall& ball);
     void Draw();
+    void Finalize();
     void SetupBowlingPins(const DirectX::XMFLOAT3& headPinPos);
     void ResetPins();
     int GetDownPinCount() const;

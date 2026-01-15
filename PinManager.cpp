@@ -1,14 +1,21 @@
 #include "PinManager.h"
 #include "bowlingBall.h"
 #include "trail_explosion.h"
+#include "Audio.h"
 using namespace DirectX;
 static constexpr float PIN_SPACING_X = 1.6f;   // â°ä‘äu
 static constexpr float PIN_SPACING_Z = 1.6f;   // âúçsä‘äu
+static int g_StrikeSound{};
+static int g_HitSound{};
 
 void PinManager::Initialize()
 {
     ResetPins();
+    g_HitSound = LoadAudio("rom\\sound\\HitSound.wav");
+    g_StrikeSound = LoadAudio("rom\\sound\\StrikeSound.wav");
 }
+
+
 
 void PinManager::Draw()
 {
@@ -48,6 +55,12 @@ void PinManager::Update(float dt, BowlingBall& ball)
    
 }
 
+
+void PinManager::Finalize()
+{
+    UnloadAudio(g_StrikeSound);
+    UnloadAudio(g_HitSound);
+}
 void PinManager::AddPin(const XMFLOAT3& pos)
 {
     Pins pin;
@@ -114,6 +127,7 @@ void PinManager::ResolveBallPinHit(BowlingBall& ball, Pins& pin)
     pin.Hit(impulseVec, hitPoint);
     // ï˙éÀèÛîöî≠
     TrailExplosion_CreateRadial(pin.GetPosition(), 0.5f);
+    PlayAudio(g_StrikeSound,false);
 
 }
 
