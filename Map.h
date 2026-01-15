@@ -30,6 +30,7 @@ public:
 		Rock,
 		WALL,
 		WALL2,
+		WALL3,
 		START,
 		GOAL,
 		Sand,

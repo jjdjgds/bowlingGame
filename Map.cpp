@@ -49,7 +49,7 @@ void Map_Initialize()
         // 床
         g_Blocks.push_back({
             { FLOOR_CENTER_X + xOffset, 1.0f, 10.0f },
-            { FLOOR_WIDTH, 1.0f, 60.0f },
+            { FLOOR_WIDTH, 1.0f, 100.0f },
                Block::Wood
             });
 
@@ -71,6 +71,13 @@ void Map_Initialize()
             { FLOOR_CENTER_X + xOffset, 1.0f, 32.0f },
             { FLOOR_WIDTH, 10.0f, 30.0f },
             Block::WALL
+            });
+
+        // 手前側の壁（奥の壁より少し手前）
+        g_Blocks.push_back({
+            { FLOOR_CENTER_X + xOffset, 1.0f, 20.0f },
+            { FLOOR_WIDTH+4, 100.0f, 2.0f },   // 薄めでOK
+            Block::WALL3
             });
 
      /*   g_Blocks.push_back({
@@ -226,7 +233,9 @@ void Block::Draw() const
     case Block::WALL2:
         Cube_Draw(mtxworld, g_MapTexId[3]);
         break;
-
+    case Block::WALL3:
+        Cube_Draw(mtxworld, 0);
+        break;
     case Block::Audience:
         Cube_Draw(mtxworld, g_MapTexId[0]);
         break;
