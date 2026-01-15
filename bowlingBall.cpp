@@ -41,6 +41,7 @@ void BowlingBall::Init(const XMFLOAT3& pos)
 
 void BowlingBall::Update(float deltaTime)
 {
+    m_gatterFlg = false;   // ← これを必ず最初に
     // ===== 重力 =====
     m_velocity.y += m_gravity * deltaTime;
 
@@ -137,16 +138,23 @@ void BowlingBall::Update(float deltaTime)
         m_Aabb.Move(m_position);
         if (hit.IsHit())
         {
+
+
+            if (block.GetType() == Block::Type::WALL)
+            {
+
+               // m_velocity = { 0,0,0 };
+                m_gatterFlg = false;   // ★重要
+                break;
+
+            }
             if (block.GetType() == Block::Type::Gutter)
             {
 
-                m_velocity.x = 0;
-                m_velocity.y = 0;
-                m_velocity.z -=0.001;
-
+                m_gatterFlg = true;
+               
             }
-
-            continue;
+        
 
         }
     }
@@ -154,12 +162,15 @@ void BowlingBall::Update(float deltaTime)
 
 
     // ===== 摩擦 =====
+   // ===== 摩擦・レーン制御 =====
     if (m_onGround)
     {
         m_velocity.x *= 0.98f;
 
-        (m_gatterFlg) ? m_velocity.z *= 0.98f : m_velocity.z *= 1.0f;
+        if (m_gatterFlg)
+            m_velocity.z *= 0.98f;
     }
+
 
    
     Shot_SetPosition(m_position);

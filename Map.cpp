@@ -34,9 +34,9 @@ void Map_Initialize()
 {
    
     g_Blocks.push_back({ {4.0, 1.0f,10.0},{8.0,1.0,60.0}, Block::Wood });
-    g_Blocks.push_back({ {-0.50, 0.9f,10.0},{1.0,1.0,60.0}, Block::Gutter});
-    g_Blocks.push_back({ {8.50, 0.9f,10.0},{1.0,1.0,60.0}, Block::Gutter });
-    g_Blocks.push_back({ {3, 1.0f,20.0},{15.0,10.0,1.0}, Block::Gutter });
+    g_Blocks.push_back({ {-0.50, 0.9f,-10.0},{1.0,1.0,60.0}, Block::Gutter});
+    g_Blocks.push_back({ {8.50, 0.9f,-10.0},{1.0,1.0,60.0}, Block::Gutter });
+    g_Blocks.push_back({ {3, 1.0f,32.0},{15.0,10.0,30.0}, Block::WALL });
 
 
 
@@ -63,10 +63,19 @@ void Map_Initialize()
             block.SetAABB(AABB::Make(block.GetPosition(), block.GetScale()));
             break;
 
+        case Block::WALL:
+        {
+            XMFLOAT3 blockScale = block.GetScale();
+            blockScale.z -= 5;
+            block.SetAABB(AABB::Make(block.GetPosition(), blockScale));
+        }
+            break;
         case Block::Gutter:
+        {
             XMFLOAT3 blockScale = block.GetScale();
             blockScale.y += 5;
             block.SetAABB(AABB::Make(block.GetPosition(), blockScale));
+        }
             break;
 
         case Block::GOAL:
@@ -128,7 +137,7 @@ void Block::Draw() const
         Cube_Draw(mtxworld, g_MapTexId[1]);
         //ModelDraw(g_MapModels[0],mtxworld);
         break;
-
+    case Block::WALL:
     case Block::Gutter:
 
         Cube_Draw(mtxworld, g_MapTexId[2]);
@@ -136,7 +145,7 @@ void Block::Draw() const
 
     case Block::Tree:
     case Block::Rock:
-    case Block::WALL:
+   
     case Block::START:
     case Block::GOAL:
         ModelDraw(g_MapModels[1], mtxworld);
