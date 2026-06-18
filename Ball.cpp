@@ -14,12 +14,12 @@
 
 =========================================================================*/
 
-#include "Ball.h"
+#include "ball.h"
 #include "model.h"
 #include "direct3d.h"
 #include "DirectXMath.h"
 #include "shader3d.h"
-#include "Map.h"
+#include "map.h"
 #include "keylogger.h"
 
 
@@ -42,7 +42,7 @@ void Ball_Initialize(const DirectX::XMFLOAT3& position)
 	g_Pos = g_PrevPosition = position;
 
 
-	// ★コレだけで十分
+	//  コレだけで十分
 	g_Aabb = AABB::Make(position, { 0.3f,0.3f,0.3f });
 	//g_Aabb.Move(position);
 }

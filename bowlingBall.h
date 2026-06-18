@@ -1,5 +1,5 @@
 /*==========================================================================
-ボーリングの球のクラス定義
+ボーリングの球のクラス定義[bowringBall.h]
 	
 
 
@@ -13,7 +13,7 @@
 
 #pragma once
 #include <DirectXMath.h>
-#include "Collision.h"
+#include "collision.h"
 class BowlingBall
 {
 public:
@@ -25,7 +25,7 @@ public:
     // 更新
     void Update(float deltaTime);
 
-    // 描画（中身はあとで）
+    // 描画
     void Draw() ;
 
     // 操作用
@@ -42,14 +42,16 @@ public:
     const DirectX::XMFLOAT3& GetVelocity() const { return m_velocity; }
     float GetMass() const { return m_mass; }
     const AABB& GetAABB() { return m_Aabb; }
+
+
 private:
+
     DirectX::XMFLOAT3 m_position{};
     DirectX::XMFLOAT3 m_velocity{};
     float m_gravity = -9.8f;
     bool  m_onGround = false;
     float m_pawer = 50.0f;
      AABB m_Aabb{};
-    //float m_radius = 0.3f;   // レーン基準の半径
     float m_mass = 6.8f;    // ボーリング球っぽい重さ(kg)
     DirectX::XMMATRIX m_mtxWorld{};
     bool m_gatterFlg = false;

@@ -1,6 +1,6 @@
 /*==========================================================================
 
-パーティクルエフェクト実装
+パーティクルエフェクト実装[particleEffect.cpp]
 
                                                 Author : hidetoshi muramatu
                                                 Date   : 2025/01/11
@@ -8,8 +8,8 @@
 
 =========================================================================*/
 
-#include "ParticleEffect.h"
-#include "BillBord.h"
+#include "particleEffect.h"
+#include "billBord.h"
 #include "texture.h"
 #include <cmath>
 

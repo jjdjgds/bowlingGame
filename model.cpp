@@ -1,4 +1,18 @@
 
+/*==========================================================================
+モデルの描画やロード[model.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+
 #include "direct3d.h"
 #include "DirectXTex.h"
 #include "model.h"
@@ -52,7 +66,7 @@ MODEL* ModelLoad(const char* FileName, float scale, bool isblender)
                 mesh->mVertices[v].z * scale
             };
 
-            // ★ texcoord NULL ガード
+            //   texcoord NULL ガード
             if (mesh->mTextureCoords[0])
             {
                 vertex[v].texcoord = {
@@ -83,7 +97,7 @@ MODEL* ModelLoad(const char* FileName, float scale, bool isblender)
                 min.y = std::min(min.y, vertex[v].position.y);
                 min.z = std::min(min.z, vertex[v].position.z);
 
-                // ★ max は max
+                //   max は max
                 max.x = std::max(max.x, vertex[v].position.x);
                 max.y = std::max(max.y, vertex[v].position.y);
                 max.z = std::max(max.z, vertex[v].position.z);
@@ -131,7 +145,7 @@ MODEL* ModelLoad(const char* FileName, float scale, bool isblender)
 
     model->Aabb = { min, max };
 
-    // ★ 内蔵テクスチャ（WIC）安全読み込み
+    //   内蔵テクスチャ（WIC）安全読み込み
     for (unsigned int i = 0; i < model->AiScene->mNumTextures; i++)
     {
         aiTexture* aitex = model->AiScene->mTextures[i];
@@ -235,7 +249,7 @@ void ModelDraw(const MODEL* model, const XMMATRIX& mtxWorld)
         aiString texName;
         mat->GetTexture(aiTextureType_DIFFUSE, 0, &texName);
 
-        // ★ at() 廃止
+        //   at() 廃止
         auto it = model->Texture.find(texName.C_Str());
         if (it != model->Texture.end())
         {

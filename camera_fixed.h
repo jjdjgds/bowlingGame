@@ -1,6 +1,6 @@
 /*==========================================================================
 
-Camera_fixed.h
+固定カメラの定義[Camera_fixed.h]
 
 												Author : hidetoshi muramatu
 												Date   : 2025/12/16
@@ -18,7 +18,7 @@ Camera_fixed.h
 #pragma once
 #include <DirectXMath.h>
 #include "camera.h"
-#include "Collision.h"
+#include "collision.h"
 
 
 class FixedCamera : public Camera
@@ -38,8 +38,7 @@ public:
 	{
 		SetPosition(position);
 	}
-	//virtual ~Camera() = default;
-	//void Update(double elapsed_time)override;//キー入力待ち
+	
 	void SetMatrix() override;
 	bool IsOverlap();
 	void SetTarget(const DirectX::XMFLOAT3& target) {

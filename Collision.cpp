@@ -13,7 +13,7 @@
 
 =========================================================================*/
 
-#include "Collision.h"
+#include "collision.h"
 #include <algorithm>
 #include "DirectXMath.h"
 using namespace DirectX;

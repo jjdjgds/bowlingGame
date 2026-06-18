@@ -1,9 +1,23 @@
-#include "Camera.h"
+/*==========================================================================
+カメラ機能の実装[Camera.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+
+#include "camera.h"
 #include "direct3d.h"
 #include <DirectXMath.h>
 using namespace DirectX;
 
-// ★ static メンバの定義（絶対必要）
+//   static メンバの定義（絶対必要）
 ID3D11Buffer* Camera::m_pVSConstantBuffer1 = nullptr;
 ID3D11Buffer* Camera::m_pVSConstantBuffer2 = nullptr;
 int Camera::m_ReferenceCount = 0;

@@ -1,4 +1,18 @@
-#include "DirectionCamera.h"
+/*==========================================================================
+ââèoópÉJÉÅÉâ[directionCamera.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+
+#include "directionCamera.h"
 #include <DirectXMath.h>
 #include "keylogger.h"
 #include "direct3d.h"

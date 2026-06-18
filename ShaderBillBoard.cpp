@@ -1,6 +1,6 @@
 /*==========================================================================
 
-ビルボードシェーダ
+ビルボードのシェーダ[shaderBillBoard]
 
 												Author : hidetoshi muramatu
 												Date   : 2025/
@@ -15,7 +15,7 @@
 
 
 
-#include "ShaderBillBoard.h"
+#include "shaderBillBoard.h"
 #include <DirectXMath.h>
 using namespace DirectX;
 

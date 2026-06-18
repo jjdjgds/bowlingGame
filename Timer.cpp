@@ -13,7 +13,7 @@
 
 
 
-#include "Timer.h"
+#include "timer.h"
 #include "sprite.h"
 #include "texture.h"
 #include "algorithm"

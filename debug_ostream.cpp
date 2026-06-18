@@ -1,6 +1,6 @@
 /*==========================================================================
 
-debug ostream‚ğì‚Á‚Äg‚¨‚¤ [debug_ostream.cpp]
+ [debug_ostream.cpp]
 
 
 												Author : hidetoshi muramatu

@@ -1,10 +1,22 @@
+/*==========================================================================
+
+	ゲーム全体の初期化／更新／描画／終了処理を管理 [game.cpp]
+	
+
+													Author : hidetoshi muramatu
+---------------------------------------------------------------------------
+
+
+==========================================================================*/
+
+
 #include "game.h"
 #include "game_bg.h"
 #include "grid.h"
 #include "game_score.h"
 #include "lighth.h"
 #include "keylogger.h"
-#include "Map.h"
+#include "map.h"
 #include "debug.h"
 #include "camera.h"
 #include "gameeffect.h"
@@ -13,30 +25,29 @@
 
 #include "direct3d.h"
 #include "scene.h"
-#include "Timer.h"
-#include "Ball.h"
+#include "timer.h"
+#include "ball.h"
 #include "sprite_anim.h"
 
 #include "model.h";
-#include "Shot.h"
-#include "BillBord.h"
+#include "shot.h"
+#include "billBord.h"
 #include "sprite_anim.h"
-#include "ShotCamera.h"
+#include "shotCamera.h"
 #include "camera_fixed.h"
 #include "trail.h"
 #include "bowlingBall.h"
-#include "DebugDraw.h"
-#include "Mouselogger.h"
-#include "PinManager.h"
-//#include "AuraEffect.h"
-#include "ParticleEffect.h"
-#include "ScoreBoard.h"
+#include "debugDraw.h"
+#include "mouselogger.h"
+#include "pinManager.h"
+#include "particleEffect.h"
+#include "scoreBoard.h"
 
-#include "debug_ostream.h" // 追加：ログ出力用
-#include "trail_explosion.h"
-#include "DirectionCamera.h"
+#include "debug_ostream.h"
+#include "trailExplosion.h"
+#include "directionCamera.h"
 #include "UI.h"
-#include "Audio.h"
+#include "audio.h"
 using namespace DirectX;
 
 
@@ -107,22 +118,17 @@ void Game_Initialize()
 	g_FixedCameras[1] = new FixedCamera({5.0f, 10.0f, 10.0f}, AABB::Make({ 6.0f,6.0f,6.0f }, { 20.0f,10.0f,20.0f }));
 	g_BowlingBall.Init(BALL_START_POS);
 	ScoreBoard_Initialize();
-//	Cube01tex = Texture_Load(L"rom\\saikoro_image.png");
 	Billboard_Initialize();
 	Gulid_Initialize(10,10,1);
 	Map_Initialize();
 	Light_Initialize();
 	
 	a.z += 20;
-	//a.z += 30;
-//	Ball_Initialize({3,5,2});
 	hal::dout << a.z;
 	Shot_Initialize(a,g_pDebugCamera->GetFront());
 	Score_Initialize(100,100,2);
 	Trail_Initialize();
-	UI::Initialize(); // ← 追加
-	//df.fbx
-	//g_pPenis = ModelLoad("rom\\Model\\yajirusi.fbx",0.1);
+	UI::Initialize();
 	g_texid = Texture_Load(L"rom\\Texture\\gra_effect_lightA.png");
 
 
@@ -145,13 +151,12 @@ void Game_Update(double elapsed_time)
 
 
 	g_BowlingBall.Update(elapsed_time);
-	Shot_SetPosition(g_BowlingBall.GetPosition()); // ★追加
+	Shot_SetPosition(g_BowlingBall.GetPosition()); //  追加
 	UI::Update(elapsed_time);
 
-	// ココを追加
-	//Cube_Update(elapsed_time);
+	
 	Shot_Update(elapsed_time);
-	//Ball_Update(elapsed_time);
+	
 	Trail_AddPosition(Ball_GetPosition());
 	Billboard_Update(elapsed_time);
 	for (int i = 0; i < 2; i++)
@@ -168,9 +173,7 @@ void Game_Update(double elapsed_time)
 
 	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
 	TrailExplosion_SetCameraPosition(g_pDebugCamera->GetPosition());
-	//Direct3D_SetDepthTest(true);
-	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f, 2.0f }, { 0.7,1 }, {0.5,0.5});
-	 // 爆発更新
+ // 爆発更新
 	TrailExplosion_Update(elapsed_time);
 	
 	Score_Update();
@@ -199,7 +202,6 @@ void Game_Update(double elapsed_time)
 		g_BowlingBall.AddForce(Shot_GetShotVelocity());
 		Shot_ResetPower();
 		g_BallInPlay = true;
-		//g_pDirectionCamera->StartYEase();
 	}
 
 	g_pDebugCamera->Update(elapsed_time);
@@ -317,7 +319,6 @@ void Game_Draw()
 {
 
 	Direct3D_SetDepthTest(true);
-	//g_pShotCamera->SetMatrix();
 	if (g_BallInPlay)
 	{
 		g_pDirectionCamera->SetMatrix();
@@ -328,8 +329,6 @@ void Game_Draw()
 	}
 
 	Billboard_SetViewMatrix(g_pDebugCamera->GetViewMatrix());
-	//Direct3D_SetDepthWriteDisable();
-	//g_pAnimPlayer->BillboardDraw({ 3.0, 2.0f, 2.0f }, { 0.7,1 }, {0.5,0.5});
 	
 	
 	g_BowlingBall.Draw();
@@ -341,13 +340,6 @@ void Game_Draw()
 	XMStoreFloat3(&direction, { -1.0f,-1.5f,1.0f });
 	Light_SetDiffuse({ 0.5f,0.5f,0.5f }, direction);
 
-	//ModelDraw(g_pKirby, XMMatrixIdentity());
-	/*Ball_Draw();
-	if (Ball_IsStationary()) {
-		Shot_Draw();
-	}
-	Trail_Draw();*/
-	//ModelDraw(g_pPenis, XMMatrixIdentity());
 	
 		Shot_Draw();
 		
@@ -357,11 +349,8 @@ void Game_Draw()
 
 
 
-	//Billboard_Draw(g_texid, g_BowlingBall.GetWorldMatrix(),
-	//	{ 140.0f,200.0f }, { 140.0f,145.0f }); // world を Identity にするか、任意のワールド行列を渡す
-	//
+	
 	Map_Draw();
-	//DebugDraw_Draw();
 	TrailExplosion_Draw();
 	//2D描画はここに
 	Direct3D_SetDepthTest(false);
@@ -385,13 +374,11 @@ void Game_Draw()
 
 void Game_Finalize()
 {
-	//delete g_pTestAnim2;
 	delete g_pTestAnim;
 	delete g_pDebugCamera;
 	delete g_pShotCamera;
 	ModelRelease(g_pKirby);
 	DebugDraw_Finalize();
-	//ModelRelease(g_pPenis);
 	Ball_Finalize();
 	Map_Finalize();
 	Gulid_Finalize();

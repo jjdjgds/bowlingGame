@@ -1,8 +1,20 @@
+/*==========================================================================
+
+	デバッグ用のライン描画ユーティリティ。[ debugDraw.h]
+
+
+													Author : hidetoshi muramatu
+---------------------------------------------------------------------------
+
+
+==========================================================================*/
+
+
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <vector>
-#include "Collision.h" // AABB が定義されているヘッダ
+#include "collision.h" // AABB が定義されているヘッダ
 
 void DebugDraw_Initialize(int maxLines = 8192);
 void DebugDraw_Finalize();

@@ -17,7 +17,7 @@
 #include "titile.h"
 #include "game.h"
 #include "result.h"
-#include "GameOver.h"
+#include "gameOver.h"
 static Scene g_Scene = SCENE_TITLE;//‚±‚±‚ğ•ÏX‚·‚ê‚Î‚·‚®‚ÉƒQ[ƒ€‚És‚¯‚é
 static Scene g_SceneNext = g_Scene;
 

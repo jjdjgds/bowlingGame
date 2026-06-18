@@ -18,7 +18,7 @@
 #include "texture.h" 
 #include "sprite.h"
 #include "fade.h"
-#include "Audio.h"
+#include "audio.h"
 #include "direct3d.h"
 #include "math.h"
 #include <DirectXMath.h>

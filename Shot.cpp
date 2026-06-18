@@ -1,8 +1,22 @@
-﻿#include "Shot.h"
+﻿
+/*==========================================================================
+ボウリングの投球操作（ショット制御）を管理[shot.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+#include "shot.h"
 #include "model.h"
 #include "mouse.h"
 #include "keylogger.h"
-#include "Mouselogger.h"
+#include "mouselogger.h"
 #include "debug_ostream.h"
 #include "sprite.h"
 #include "texture.h"
@@ -71,7 +85,7 @@ void Shot_ResetPower()
     g_ChargeRatio = 0.0f;
     g_ChargeDir = 1.0f;
 
-    g_IsCharging = true;   // ★ ここが重要
+    g_IsCharging = true;   //   ここが重要
     g_State = ShotState::Charge;
 }
 
@@ -143,7 +157,7 @@ void Shot_Update(double et)
                 g_ChargeDir = 1.0f;
             }
 
-            // ★ ここで確定
+            //   ここで確定
             if (KeyLogger_IsTrigger(KK_P))
             {
                 g_Power = Clamp(

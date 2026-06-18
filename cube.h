@@ -1,7 +1,7 @@
 /*==========================================================================
 
 
-cube‚Ì•`‰æ[cube.h]
+cube‚Ì’è‹`[cube.h]
 												Author : hidetoshi muramatu
 												Date   : 2025/10/16
 ---------------------------------------------------------------------------
@@ -26,4 +26,3 @@ void Cube_Finalize();
 void Cube_Update(double elapsedTime);
 void Cube_Draw(const XMMATRIX& mtxWorld,int texid);
 
-//Camera* GetCamera();

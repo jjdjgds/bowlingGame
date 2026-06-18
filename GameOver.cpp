@@ -1,13 +1,28 @@
-#include "GameOver.h"
+/*==========================================================================
+ゲームオーバ画面の実装[gameOver.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+#include "gameOver.h"
 #include "keylogger.h"
 #include "texture.h" 
 #include "sprite.h"
 #include "fade.h"
-#include "Audio.h"
+#include "audio.h"
 #include "direct3d.h"
 #include "math.h"
 #include <DirectXMath.h>
 #include "scene.h"
+
+
 static int g_WaitTime = 1.0;
 using namespace DirectX;
 static int g_GameOverTex = -1; // タイトルテクスチャ

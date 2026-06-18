@@ -1,7 +1,7 @@
 
 /*==========================================================================
 
-camera_fixed.cpp
+ŒÅ’èƒJƒƒ‰‚ÌÀ‘• [camera_fixed.cpp]
 
 												Author : hidetoshi muramatu
 												Date   : 2025/12/16

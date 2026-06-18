@@ -32,7 +32,7 @@ struct TrailExplosionSettings
 	bool useGravity;                     // 重力を使うか
 	float scale;                         // 全体スケール
 
-	DirectX::XMFLOAT3 rotation; // ★追加（Euler角：ラジアン）
+	DirectX::XMFLOAT3 rotation; //  追加（Euler角：ラジアン）
 };
 
 void TrailExplosion_Initialize();

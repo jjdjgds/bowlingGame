@@ -1,3 +1,17 @@
+
+/*==========================================================================
+デバック用カメラの実装[debug.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
 #include "debug.h"
 #include <DirectXMath.h>
 #include "keylogger.h"
@@ -38,31 +52,35 @@ void DebugCamera::Update(double elapsed_time)
     XMVECTOR xup = XMLoadFloat3(&m_up);
     XMVECTOR xposition = XMLoadFloat3(&GetPosition());
 
+#ifdef _DEBUG
     //// --- 回転操作 ---
-    //if (KeyLogger_IsPressed(KK_RIGHT))
-    //{
-    //    // Y軸回転
-    //    XMMATRIX rot = XMMatrixRotationY(ROTSPEED);
-    //    xfront = XMVector3TransformNormal(xfront, rot);
-    //    xright = XMVector3TransformNormal(xright, rot);
-    //}
-    //if (KeyLogger_IsPressed(KK_LEFT))
-    //{
-    //    XMMATRIX rot = XMMatrixRotationY(-ROTSPEED);
-    //    xfront = XMVector3TransformNormal(xfront, rot);
-    //    xright = XMVector3TransformNormal(xright, rot);
-    //}
-    //if (KeyLogger_IsPressed(KK_UP))
-    //{
-    //    // ピッチ（上下回転）
-    //    XMMATRIX rot = XMMatrixRotationAxis(xright, -ROTSPEED);
-    //    xfront = XMVector3TransformNormal(xfront, rot);
-    //}
-    //if (KeyLogger_IsPressed(KK_DOWN))
-    //{
-    //    XMMATRIX rot = XMMatrixRotationAxis(xright, ROTSPEED);
-    //    xfront = XMVector3TransformNormal(xfront, rot);
-    //}
+    if (KeyLogger_IsPressed(KK_RIGHT))
+    {
+        // Y軸回転
+        XMMATRIX rot = XMMatrixRotationY(ROTSPEED);
+        xfront = XMVector3TransformNormal(xfront, rot);
+        xright = XMVector3TransformNormal(xright, rot);
+    }
+    if (KeyLogger_IsPressed(KK_LEFT))
+    {
+        XMMATRIX rot = XMMatrixRotationY(-ROTSPEED);
+        xfront = XMVector3TransformNormal(xfront, rot);
+        xright = XMVector3TransformNormal(xright, rot);
+    }
+    if (KeyLogger_IsPressed(KK_UP))
+    {
+        // ピッチ（上下回転）
+        XMMATRIX rot = XMMatrixRotationAxis(xright, -ROTSPEED);
+        xfront = XMVector3TransformNormal(xfront, rot);
+    }
+    if (KeyLogger_IsPressed(KK_DOWN))
+    {
+        XMMATRIX rot = XMMatrixRotationAxis(xright, ROTSPEED);
+        xfront = XMVector3TransformNormal(xfront, rot);
+    }
+#endif // _DEBUG
+
+  
 
     // upベクトルは常に固定
     xup = XMVectorSet(0, 1, 0, 0);

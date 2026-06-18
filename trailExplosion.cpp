@@ -1,4 +1,18 @@
-#include "trail_explosion.h"
+/*==========================================================================
+テールを使った爆破の機能[trailexplosion]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+
+#include "trailExplosion.h"
 #include "trail.h"
 #include <vector>
 #include <cmath>
@@ -144,7 +158,7 @@ void TrailExplosion_Draw()
 
 			// トレイルクリア
 			Trail_Clear();
-			Trail_SetColor(startColor, endColor); // ★毎回設定
+			Trail_SetColor(startColor, endColor); //  毎回設定
 
 			Trail_SetEnabled(true);
 			Trail_SetFadeEnabled(true);

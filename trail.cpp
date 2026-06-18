@@ -1,7 +1,22 @@
+
+/*==========================================================================
+ÉeÅ[ÉãÇÃï`âÊÇ‚åvéZÇ»Ç«[trail.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+
 #include "trail.h"
 #include <d3d11.h>
 #include "direct3d.h"
-#include "ShaderBillBoard.h"
+#include "shaderBillBoard.h"
 using namespace DirectX;
 
 static constexpr int POSITION_COUNT_MAX = 50;

@@ -4,12 +4,10 @@
 
 												Author : hidetoshi muramatu
 												Date   : 2025/12/04
----------------------------------------------------------------------------
+---------------------------------------------------------------------------*/
 
-*/
-
-#include "BillBord.h"
-#include "ShaderBillBoard.h"
+#include "billBord.h"
+#include "shaderBillBoard.h"
 #include <DirectXMath.h>
 #include "direct3d.h"
 #include "texture.h"

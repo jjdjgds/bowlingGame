@@ -1,5 +1,14 @@
-﻿// ScoreBoard.cpp
-#include "ScoreBoard.h"
+﻿/*==========================================================================
+
+スコア表示（フレーム・投球毎）を管理 [ScoreBoard.cpp]
+   
+                                                    Author : hidetoshi muramatu
+---------------------------------------------------------------------------
+
+
+==========================================================================*/
+
+#include "scoreBoard.h"
 #include "debug_text.h"
 #include "debug_ostream.h"
 #include "sprite.h"

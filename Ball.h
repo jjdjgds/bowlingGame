@@ -15,7 +15,7 @@
 =========================================================================*/
 #pragma once
 #include "DirectXMath.h"
-#include "Collision.h"
+#include "collision.h"
 
 void Ball_Initialize(const DirectX::XMFLOAT3& position);
 void Ball_Finalize();

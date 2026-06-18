@@ -1,7 +1,21 @@
-#include "PinManager.h"
+/*==========================================================================
+ピンの管理者[pinmanager.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
+
+#include "pinManager.h"
 #include "bowlingBall.h"
-#include "trail_explosion.h"
-#include "Audio.h"
+#include "trailExplosion.h"
+#include "audio.h"
 using namespace DirectX;
 static constexpr float PIN_SPACING_X = 1.6f;   // 横間隔
 static constexpr float PIN_SPACING_Z = 1.6f;   // 奥行間隔
@@ -121,7 +135,7 @@ void PinManager::ResolveBallPinHit(BowlingBall& ball, Pins& pin)
     XMFLOAT3 impulseVec;
     XMStoreFloat3(&impulseVec, impulse);
 
-    // ★ 上方向ボーナス
+    //   上方向ボーナス
     impulseVec.y += impulsePower;
 
     pin.Hit(impulseVec, hitPoint);

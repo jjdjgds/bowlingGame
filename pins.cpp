@@ -1,7 +1,20 @@
+/*==========================================================================
+ピンの処理[pins.cpp]
+	
+
+
+													Author : hidetoshi muramatu
+													
+---------------------------------------------------------------------------
+
+
+
+==========================================================================*/
+
 #include "pins.h"
 #include "cube.h"
-#include "DebugDraw.h"
-#include "trail_explosion.h"
+#include "debugDraw.h"
+#include "trailExplosion.h"
 using namespace DirectX;
 
 static constexpr float GRAVITY = -9.8f;
@@ -35,7 +48,6 @@ void Pins::Initialize(const XMFLOAT3& pos)
     m_lifeTimer = 0.0f;
     
     m_model = ModelLoad("rom\\Model\\Pin.fbx", 0.9);
-        //m_model = ModelLoad("rom\\Model\\bowlingBall1.fbx", 0.9);
     m_baseHalf = { 1.5f, 3.f, 1.5f };
 
     m_Aabb = AABB::Make(m_position, m_baseHalf);
@@ -220,7 +232,7 @@ void Pins::MoveOffscreen(float x)
     m_Aabb.Move(aabbCenter);
 }
 
-// 新: 明示的に位置をセットする
+//明示的に位置をセットする
 void Pins::SetPosition(const XMFLOAT3& pos)
 {
     m_position = pos;

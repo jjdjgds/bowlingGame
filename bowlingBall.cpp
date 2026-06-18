@@ -1,12 +1,24 @@
-﻿#include "BowlingBall.h"
+﻿
+/*==========================================================================
+
+   ボウリングのボール挙動を実装[bowlingBall.cpp]
+   
+
+                                                    Author : hidetoshi muramatu
+---------------------------------------------------------------------------
+
+
+==========================================================================*/
+
+#include "bowlingBall.h"
 #include "model.h"
 #include "direct3d.h"
 #include "shader3d.h"
-#include "DebugDraw.h" // 追加
-#include "Map.h"
-#include "Shot.h"
+#include "debugDraw.h" // 追加
+#include "map.h"
+#include "shot.h"
 #include "texture.h"
-#include "ParticleEffect.h"
+#include "particleEffect.h"
 #include "lighth.h" // 追加：ライト初期化／設定用
 using namespace DirectX;
 static MODEL* g_pBall{};
@@ -145,7 +157,7 @@ void BowlingBall::Update(float deltaTime)
             {
 
                // m_velocity = { 0,0,0 };
-                m_gatterFlg = false;   // ★重要
+                m_gatterFlg = false;   //  重要
                 break;
 
             }
