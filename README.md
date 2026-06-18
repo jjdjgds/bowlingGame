@@ -1,3 +1,5 @@
+プロジェクト名 bowlingGame
+
 C++とDirectX 11を使用した3Dゲーム
 
 使用言語：C,C++
